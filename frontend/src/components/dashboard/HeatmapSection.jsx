@@ -1,32 +1,36 @@
 import React from 'react';
-import { MapPin, Info } from 'lucide-react';
-import HotspotsList from './HotspotsList';
-import { topTheftHotspots } from '../../data/mockData';
+import { MapPin } from 'lucide-react';
 
-const HeatmapSection = () => (
-  <div className="bg-white p-6 rounded-lg shadow-sm">
-    <h3 className="font-semibold text-lg mb-4 flex items-center">
-      <MapPin className="w-5 h-5 mr-2 text-blue-600"/>
-      Kolhapur City Theft Heatmap
-    </h3>
-    <div className="h-64 bg-gray-100 rounded-lg flex flex-col items-center justify-center text-center text-gray-500 mb-6">
-      <p className="font-medium">Interactive Kolhapur City Map</p>
-      <p className="text-sm">Would show heatmap visualization with theft intensity</p>
-      <div className="flex items-center space-x-4 mt-4 text-xs">
-        <span className="flex items-center">
-          <span className="w-3 h-3 rounded-full bg-green-400 mr-1.5"></span>Low
-        </span>
-        <span className="flex items-center">
-          <span className="w-3 h-3 rounded-full bg-yellow-400 mr-1.5"></span>Medium
-        </span>
-        <span className="flex items-center">
-          <span className="w-3 h-3 rounded-full bg-red-400 mr-1.5"></span>High
-        </span>
+const HeatmapSection = ({ dateFrom, dateTo, company, dayOrNight }) => {
+   
+  const baseUrl = "http://127.0.0.1:8000/api/thefts-heatmap";
+  const params = new URLSearchParams();
+  if (dateFrom) params.append("date_from", dateFrom);
+  if (dateTo) params.append("date_to", dateTo);
+  if (company) params.append("company", company);
+  if (dayOrNight) params.append("day_or_night", dayOrNight);
+
+  const mapUrl = `${baseUrl}?${params.toString()}`;
+
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <h3 className="font-semibold text-lg mb-4 flex items-center">
+        <MapPin className="w-5 h-5 mr-2 text-blue-600"/>
+        Kolhapur City Theft Heatmap
+      </h3>
+ 
+      <div className="h-96 w-full mb-6">
+        <iframe
+          key={mapUrl}  
+          src={mapUrl}
+          title="Kolhapur Theft Heatmap"
+          width="100%"
+          height="100%"
+          style={{ border: "none" }}
+        />
       </div>
     </div>
-    <h4 className="font-semibold mb-3">Top Theft Hotspots</h4>
-    <HotspotsList hotspots={topTheftHotspots} />
-  </div>
-);
+  );
+};
 
 export default HeatmapSection;

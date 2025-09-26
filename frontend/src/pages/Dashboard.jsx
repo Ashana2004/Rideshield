@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/layout/Header';
 import Sidebar from '../components/layout/Sidebar';
 import MetricCards from '../components/dashboard/MetricCards';
@@ -6,27 +6,63 @@ import HeatmapSection from '../components/dashboard/HeatmapSection';
 import TheftByCompanyChart from '../components/charts/TheftByCompanyChart';
 import TheftByLocalityChart from '../components/charts/TheftByLocalityChart';
 import TheftTrendsChart from '../components/charts/TheftTrendsChart';
-import { 
-  totalThefts, 
-  highestRiskArea, 
-  mostStolenModel, 
-  peakTheftTime 
-} from '../data/mockData';
 
 export default function Dashboard() {
+  const [filters, setFilters] = useState({
+    dateFrom: "",
+    dateTo: "",
+    timeFrom: "",
+    timeTo: "",
+    localities: [],
+    company: "",
+    model: "",
+    dayOrNight: "",
+    theftMethods: []
+  });
+
+  const [totalThefts, setTotalThefts] = useState(0);
+  const [highestRiskArea, setHighestRiskArea] = useState("");
+  const [mostStolenModel, setMostStolenModel] = useState("");
+  const [peakTheftTime, setPeakTheftTime] = useState("");
+
+  // Load metric cards
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/total-thefts")
+      .then(res => res.json())
+      .then(data => setTotalThefts(data.total_thefts))
+      .catch(err => console.error(err));
+
+    fetch("http://127.0.0.1:8000/api/highest-area")
+      .then(res => res.json())
+      .then(data => setHighestRiskArea(`${data.highest_area} (${data.thefts})`))
+      .catch(err => console.error(err));
+
+    fetch("http://127.0.0.1:8000/api/most-model")
+      .then(res => res.json())
+      .then(data => setMostStolenModel(`${data.most_model} (${data.count})`))
+      .catch(err => console.error(err));
+
+    fetch("http://127.0.0.1:8000/api/peak-time")
+      .then(res => res.json())
+      .then(data => setPeakTheftTime(`${data.peak_hour} (${data.count})`))
+      .catch(err => console.error(err));
+  }, []);
+
   return (
     <div className="bg-gray-100 min-h-screen font-sans text-gray-800 flex">
-      <Sidebar />
+      {/* Pass filters to Sidebar */}
+      <Sidebar filters={filters} setFilters={setFilters} />
+
       <main className="flex-1 p-4 sm:p-6 lg:p-8">
         <Header />
-        
+
         <div>
           <h2 className="text-xl font-semibold mb-2">Kolhapur Bike Theft Analysis Dashboard</h2>
           <p className="text-sm text-gray-500 mb-6">
             Comprehensive analysis and visualization of bike theft patterns across Kolhapur city
           </p>
-          
-          <MetricCards 
+
+          <MetricCards
             totalThefts={totalThefts}
             highestRiskArea={highestRiskArea}
             mostStolenModel={mostStolenModel}
@@ -35,19 +71,29 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <HeatmapSection />
+              <HeatmapSection
+                dateFrom={filters.dateFrom}
+                dateTo={filters.dateTo}
+                timeFrom={filters.timeFrom}
+                timeTo={filters.timeTo}
+                localities={filters.localities.join(",")}
+                company={filters.company}
+                model={filters.model}
+                dayOrNight={filters.dayOrNight}
+                theftMethods={filters.theftMethods.join(",")}
+              />
             </div>
-            
+
             <div>
-              <TheftByCompanyChart />
+              <TheftByCompanyChart filters={filters} />
             </div>
 
             <div className="lg:col-span-2">
-              <TheftByLocalityChart />
+              <TheftByLocalityChart filters={filters} />
             </div>
-            
+
             <div>
-              <TheftTrendsChart />
+              <TheftTrendsChart filters={filters} />
             </div>
           </div>
         </div>
