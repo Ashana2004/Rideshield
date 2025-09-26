@@ -1,6 +1,9 @@
 from fastapi import APIRouter
 from collections import Counter
-from mongodb import thefts_collection   
+from mongodb import thefts_collection 
+import folium
+from folium.plugins import HeatMap
+from fastapi.responses import HTMLResponse  
 router = APIRouter()
 
  
@@ -62,12 +65,52 @@ def get_thefts_by_locality():
 @router.get("/theft-trends")
 def get_theft_trends():
     result = thefts_collection.aggregate([
-        # Group by date (YYYY-MM-DD)
+        
         {"$group": {
             "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$datetime"}},
             "count": {"$sum": 1}
         }},
-        {"$sort": {"_id": 1}}  # Sort by date ascending
+        {"$sort": {"_id": 1}}  
     ])
     trends = [{"date": r["_id"], "count": r["count"]} for r in result]
     return {"data": trends}
+
+
+@router.get("/day-night-by-company")
+def day_night_by_company():
+    
+    result = thefts_collection.aggregate([
+        {"$group": {
+            "_id": {"company": "$company", "day_or_night": "$day_or_night"},
+            "count": {"$sum": 1}
+        }},
+        {"$sort": {"_id.company": 1}}
+    ])
+    
+ 
+    data = {}
+    for r in result:
+        company = r["_id"]["company"]
+        period = r["_id"]["day_or_night"]
+        count = r["count"]
+        if company not in data:
+            data[company] = {"Day": 0, "Night": 0}
+        data[company][period] = count
+
+   
+    output = [{"company": k, "Day": v["Day"], "Night": v["Night"]} for k, v in data.items()]
+    return {"data": output}
+
+@router.get("/thefts-heatmap", response_class=HTMLResponse)
+def thefts_heatmap():
+   
+    thefts = list(thefts_collection.find({}, {"_id": 0, "latitude": 1, "longitude": 1}))
+    
+    heat_data = [[t["latitude"], t["longitude"]] for t in thefts if t.get("latitude") and t.get("longitude")]
+
+   
+    m = folium.Map(location=[16.704, 74.243], zoom_start=13)
+    HeatMap(heat_data).add_to(m)
+
+    # Render map as HTML
+    return m._repr_html_()   
