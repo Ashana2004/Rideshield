@@ -23,8 +23,7 @@ export default function Dashboard() {
   const [highestRiskArea, setHighestRiskArea] = useState("");
   const [mostStolenModel, setMostStolenModel] = useState("");
   const [peakTheftTime, setPeakTheftTime] = useState("");
-
-  // Load metric cards
+  
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/total-thefts")
       .then(res => res.json())
@@ -48,8 +47,16 @@ export default function Dashboard() {
   }, []);
 
   return (
+<<<<<<< HEAD
     <div className="bg-gray-100 min-h-screen font-sans text-gray-800">
       <main className="p-4 sm:p-6 lg:p-8">
+=======
+    <div className="bg-gray-100 min-h-screen font-sans text-gray-800 flex">
+       
+      <Sidebar filters={filters} setFilters={setFilters} />
+
+      <main className="flex-1 p-4 sm:p-6 lg:p-8">
+>>>>>>> 4528d7fcb5e421a3aa88449aa3f781cd885ad239
         <Header />
 
         <div>
