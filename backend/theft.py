@@ -16,7 +16,7 @@ def get_total_thefts():
 @router.get("/highest-area")
 def get_highest_area():
     result = thefts_collection.aggregate([
-        {"$group": {"_id": "$locality", "count": {"$sum": 1}}},
+        {"$group": {"_id": "$PLACE", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}},
         {"$limit": 1}
     ])
@@ -27,7 +27,7 @@ def get_highest_area():
 @router.get("/most-model")
 def get_most_model():
     result = thefts_collection.aggregate([
-        {"$group": {"_id": "$model", "count": {"$sum": 1}}},
+        {"$group": {"_id": "$MAKE", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}},
         {"$limit": 1}
     ])
@@ -51,13 +51,18 @@ def get_peak_time():
     peak_hour, count = hour_counts.most_common(1)[0]
     return {"peak_hour": f"{peak_hour}:00-{peak_hour}:59", "count": count}
 
-
+# need data cleaning
 @router.get("/thefts-by-locality")
 def get_thefts_by_locality():
+    
     result = thefts_collection.aggregate([
-        {"$group": {"_id": "$locality", "count": {"$sum": 1}}},
-        {"$sort": {"count": -1}}
-    ])
+    {"$group": {
+        "_id": {"$ifNull": ["$PLACE", "Unknown"]},
+        "count": {"$sum": 1}
+    }},
+    {"$sort": {"count": -1}}
+])
+
     
     data = [{"locality": r["_id"], "count": r["count"]} for r in result]
     return {"data": data}
@@ -67,7 +72,7 @@ def get_theft_trends():
     result = thefts_collection.aggregate([
         
         {"$group": {
-            "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$datetime"}},
+            "_id": {"$DATE": {"format": "%Y-%m-%d", "date": "$datetime"}},
             "count": {"$sum": 1}
         }},
         {"$sort": {"_id": 1}}  
@@ -81,7 +86,7 @@ def day_night_by_company():
     
     result = thefts_collection.aggregate([
         {"$group": {
-            "_id": {"company": "$company", "day_or_night": "$day_or_night"},
+            "_id": {"company": "$MAKE", "day_or_night": "$day_or_night"},
             "count": {"$sum": 1}
         }},
         {"$sort": {"_id.company": 1}}
@@ -103,14 +108,21 @@ def day_night_by_company():
 
 @router.get("/thefts-heatmap", response_class=HTMLResponse)
 def thefts_heatmap():
-   
-    thefts = list(thefts_collection.find({}, {"_id": 0, "latitude": 1, "longitude": 1}))
-    
-    heat_data = [[t["latitude"], t["longitude"]] for t in thefts if t.get("latitude") and t.get("longitude")]
+    thefts = list(thefts_collection.find({}, {"_id": 0, "LATITUDE": 1, "LONGITUDE": 1}))
 
-   
+    heat_data = []
+    for t in thefts:
+        try:
+            lat = float(t["LATITUDE"])
+            lon = float(t["LONGITUDE"])
+            heat_data.append([lat, lon])
+        except (KeyError, TypeError, ValueError):
+            continue
+
+    if not heat_data:
+        return HTMLResponse("<h3>No valid theft data found</h3>")
+
     m = folium.Map(location=[16.704, 74.243], zoom_start=13)
     HeatMap(heat_data).add_to(m)
 
-    # Render map as HTML
-    return m._repr_html_()   
+    return m._repr_html_()
