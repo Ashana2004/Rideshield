@@ -9,10 +9,12 @@ import {
   User,
   LogOut,
   ChevronDown,
-  Filter
+  Filter,
+  Plus,
+  AlertTriangle
 } from 'lucide-react';
 
-const Navbar = ({ toggleFilters, isFiltersOpen }) => {
+const Navbar = ({ toggleFilters, isFiltersOpen, onTheftEntryClick }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [notifications, setNotifications] = useState(3);
 
@@ -45,11 +47,21 @@ const Navbar = ({ toggleFilters, isFiltersOpen }) => {
         </div>
 
         {/* Right Section - User Menu and Notifications */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
+          {/* Theft Entry Button */}
+          <button
+            onClick={onTheftEntryClick}
+            className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+          >
+            <AlertTriangle className="w-4 h-4" />
+            <span className="text-sm font-medium hidden sm:block">Report Theft</span>
+            <Plus className="w-4 h-4 sm:hidden" />
+          </button>
+
           {/* Filters Toggle for Desktop */}
           <button
             onClick={toggleFilters}
-            className="hidden lg:flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="hidden lg:flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
           >
             <Filter className="w-4 h-4 text-gray-600" />
             <span className="text-sm font-medium text-gray-700">

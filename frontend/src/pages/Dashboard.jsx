@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/layout/Header';
-import Sidebar from '../components/layout/Sidebar';
 import MetricCards from '../components/dashboard/MetricCards';
 import HeatmapSection from '../components/dashboard/HeatmapSection';
 import TheftByCompanyChart from '../components/charts/TheftByCompanyChart';
@@ -49,11 +48,8 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="bg-gray-100 min-h-screen font-sans text-gray-800 flex">
-      {/* Pass filters to Sidebar */}
-      <Sidebar filters={filters} setFilters={setFilters} />
-
-      <main className="flex-1 p-4 sm:p-6 lg:p-8">
+    <div className="bg-gray-100 min-h-screen font-sans text-gray-800">
+      <main className="p-4 sm:p-6 lg:p-8">
         <Header />
 
         <div>

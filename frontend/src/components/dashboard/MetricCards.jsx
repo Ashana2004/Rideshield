@@ -14,21 +14,21 @@ const MetricCards = ({ totalThefts, highestRiskArea, mostStolenModel, peakTheftT
       icon={MapPin} 
       title="Highest Risk Area" 
       value={highestRiskArea} 
-      subtitle="2 thefts" 
+      // subtitle="" 
       color="text-yellow-600"
     />
     <MetricCard 
       icon={Bike} 
       title="Most Stolen Model" 
       value={mostStolenModel} 
-      subtitle="2 thefts" 
+      // subtitle="2 thefts" 
       color="text-blue-600" 
     />
     <MetricCard 
       icon={Clock} 
       title="Peak Theft Time" 
       value={peakTheftTime} 
-      subtitle="1 theft" 
+      // subtitle="1 theft" 
     />
   </div>
 );
