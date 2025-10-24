@@ -7,7 +7,7 @@ const TheftByLocalityChart = () => {
   const [theftsByLocalityData, setTheftsByLocality] = useState([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/thefts-by-locality")
+    fetch("http://127.0.0.1:8000/api/thefts-by-ps")
       .then(res => res.json())
       .then(data => setTheftsByLocality(data.data))
       .catch(err => console.error(err));
@@ -15,7 +15,7 @@ const TheftByLocalityChart = () => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
-      <h3 className="font-semibold text-lg mb-4">Thefts by Locality</h3>
+      <h3 className="font-semibold text-lg mb-4">Thefts by Police Station</h3>
       <div className="h-72 w-full">
         <ResponsiveContainer>
           <BarChart

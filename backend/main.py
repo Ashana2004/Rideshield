@@ -4,7 +4,7 @@ from theft import router as theft_router
 
 app = FastAPI()
 
-# CORS setup so frontend can talk to backend
+ 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],   
