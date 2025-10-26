@@ -2,7 +2,7 @@ import pandas as pd
 from pymongo import MongoClient
 
 # 1. Load CSV file
-file_path = r"C:\Users\patil\Downloads\theftdata.csv"
+file_path = r"C:\Users\patil\Downloads\cleaned_data (2).csv"
 df = pd.read_csv(file_path)
 
 # 2. Connect to MongoDB (make sure MongoDB service is running locally)
@@ -15,8 +15,8 @@ collection = db["thefts"]     # collection name
 # 4. Convert DataFrame to dictionary
 data = df.to_dict(orient="records")
 
-# 5. Insert into MongoDB
-if data:  # avoid inserting empty list
+ 
+if data:   
     collection.insert_many(data)
     print(f"✅ Inserted {len(data)} records into MongoDB!")
 else:

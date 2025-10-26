@@ -1,0 +1,11 @@
+  .leaflet-marker-icon {
+  @apply shadow-none bg-transparent !important;
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+    @apply shadow-none;
+}
