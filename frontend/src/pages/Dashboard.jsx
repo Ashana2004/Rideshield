@@ -47,20 +47,16 @@ export default function Dashboard() {
   }, []);
 
   return (
-<<<<<<< HEAD
     <div className="bg-gray-100 min-h-screen font-sans text-gray-800">
-      <main className="p-4 sm:p-6 lg:p-8">
-=======
-    <div className="bg-gray-100 min-h-screen font-sans text-gray-800 flex">
-       
-      <Sidebar filters={filters} setFilters={setFilters} />
+      {/* Removed Sidebar */}
 
-      <main className="flex-1 p-4 sm:p-6 lg:p-8">
->>>>>>> 4528d7fcb5e421a3aa88449aa3f781cd885ad239
+      <main className="p-4 sm:p-6 lg:p-8">
         <Header />
 
         <div>
-          <h2 className="text-xl font-semibold mb-2">Kolhapur Bike Theft Analysis Dashboard</h2>
+          <h2 className="text-xl font-semibold mb-2">
+            Kolhapur Bike Theft Analysis Dashboard
+          </h2>
           <p className="text-sm text-gray-500 mb-6">
             Comprehensive analysis and visualization of bike theft patterns across Kolhapur city
           </p>
