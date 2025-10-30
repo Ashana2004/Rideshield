@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Sidebar from './components/layout/Sidebar';
 import Dashboard from './pages/Dashboard';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
 import TheftEntryModal from './components/theft/TheftEntryModal';
 import './index.css';
 
@@ -22,13 +25,8 @@ function App() {
   };
 
   const handleSubmitTheftReport = (theftData) => {
-    // Handle the theft report submission here
     console.log('Theft Report Submitted:', theftData);
-    // You can add API call here to submit the data to backend
-    // Example: fetch('/api/thefts', { method: 'POST', body: JSON.stringify(theftData) })
     setIsTheftModalOpen(false);
-    
-    // Show success message
     alert('Theft report submitted successfully!');
   };
 
@@ -50,9 +48,20 @@ function App() {
         
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
-          <div className="p-4 sm:p-6 lg:p-8">
-            <Dashboard />
-          </div>
+          <Routes>
+            <Route path="/" element={
+              <div className="p-4 sm:p-6 lg:p-8">
+                <Dashboard />
+              </div>
+            } />
+            <Route path="/dashboard" element={
+              <div className="p-4 sm:p-6 lg:p-8">
+                <Dashboard />
+              </div>
+            } />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
         </main>
       </div>
 

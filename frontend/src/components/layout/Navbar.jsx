@@ -13,10 +13,24 @@ import {
   Plus,
   AlertTriangle
 } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-const Navbar = ({ toggleFilters, isFiltersOpen, onTheftEntryClick }) => {
+const Navbar = ({ toggleSidebar, isSidebarOpen, onTheftEntryClick }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [notifications, setNotifications] = useState(3);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const isActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/' || location.pathname === '/dashboard';
+    }
+    return location.pathname === path;
+  };
+
+  const handleNavClick = (path) => {
+    navigate(path);
+  };
 
   return (
     <nav className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
@@ -24,26 +38,58 @@ const Navbar = ({ toggleFilters, isFiltersOpen, onTheftEntryClick }) => {
         {/* Left Section - Menu Button and Brand */}
         <div className="flex items-center space-x-4">
           <button
-            onClick={toggleFilters}
+            onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden"
           >
-            {isFiltersOpen ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+            {isSidebarOpen ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
           </button>
           
-          <div className="flex items-center space-x-3">
+          <Link to="/" className="flex items-center space-x-3">
             <Shield className="w-8 h-8 text-blue-600" />
             <div>
               <h1 className="text-xl font-bold text-gray-900">BikeGuard</h1>
               <p className="text-xs text-gray-500">Security Dashboard</p>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Center Section - Navigation Links (Desktop) */}
         <div className="hidden md:flex items-center space-x-1">
-          <NavLink icon={BarChart3} text="Dashboard" active={true} />
-          <NavLink icon={Shield} text="Reports" />
-          <NavLink icon={Settings} text="Settings" />
+          <button
+            onClick={() => handleNavClick('/dashboard')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+              isActive('/dashboard')
+                ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4" />
+            <span className="font-medium">Dashboard</span>
+          </button>
+          
+          <button
+            onClick={() => handleNavClick('/reports')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+              isActive('/reports')
+                ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <Shield className="w-4 h-4" />
+            <span className="font-medium">Reports</span>
+          </button>
+          
+          <button
+            onClick={() => handleNavClick('/settings')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+              isActive('/settings')
+                ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            <span className="font-medium">Settings</span>
+          </button>
         </div>
 
         {/* Right Section - User Menu and Notifications */}
@@ -58,14 +104,14 @@ const Navbar = ({ toggleFilters, isFiltersOpen, onTheftEntryClick }) => {
             <Plus className="w-4 h-4 sm:hidden" />
           </button>
 
-          {/* Filters Toggle for Desktop */}
+          {/* Sidebar Toggle for Desktop */}
           <button
-            onClick={toggleFilters}
+            onClick={toggleSidebar}
             className="hidden lg:flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
           >
             <Filter className="w-4 h-4 text-gray-600" />
             <span className="text-sm font-medium text-gray-700">
-              {isFiltersOpen ? 'Hide Filters' : 'Show Filters'}
+              {isSidebarOpen ? 'Hide Sidebar' : 'Show Sidebar'}
             </span>
           </button>
 
@@ -102,7 +148,13 @@ const Navbar = ({ toggleFilters, isFiltersOpen, onTheftEntryClick }) => {
                   <p className="text-sm font-medium text-gray-900">Admin User</p>
                   <p className="text-xs text-gray-500">admin@bikeguard.com</p>
                 </div>
-                <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                <button 
+                  onClick={() => {
+                    handleNavClick('/settings');
+                    setIsProfileOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
                   Profile Settings
                 </button>
                 <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
@@ -122,38 +174,38 @@ const Navbar = ({ toggleFilters, isFiltersOpen, onTheftEntryClick }) => {
 
       {/* Mobile Navigation */}
       <div className="md:hidden mt-3 flex justify-center space-x-4 border-t border-gray-100 pt-3">
-        <MobileNavLink icon={BarChart3} text="Dashboard" active={true} />
-        <MobileNavLink icon={Shield} text="Reports" />
-        <MobileNavLink icon={Settings} text="Settings" />
+        <button
+          onClick={() => handleNavClick('/dashboard')}
+          className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-lg transition-colors ${
+            isActive('/dashboard') ? 'text-blue-600' : 'text-gray-600'
+          }`}
+        >
+          <BarChart3 className="w-5 h-5" />
+          <span className="text-xs font-medium">Dashboard</span>
+        </button>
+        
+        <button
+          onClick={() => handleNavClick('/reports')}
+          className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-lg transition-colors ${
+            isActive('/reports') ? 'text-blue-600' : 'text-gray-600'
+          }`}
+        >
+          <Shield className="w-5 h-5" />
+          <span className="text-xs font-medium">Reports</span>
+        </button>
+        
+        <button
+          onClick={() => handleNavClick('/settings')}
+          className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-lg transition-colors ${
+            isActive('/settings') ? 'text-blue-600' : 'text-gray-600'
+          }`}
+        >
+          <Settings className="w-5 h-5" />
+          <span className="text-xs font-medium">Settings</span>
+        </button>
       </div>
     </nav>
   );
 };
-
-// Desktop Navigation Link Component
-const NavLink = ({ icon: Icon, text, active = false }) => (
-  <button
-    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-      active
-        ? 'bg-blue-50 text-blue-600 border border-blue-200'
-        : 'text-gray-600 hover:bg-gray-100'
-    }`}
-  >
-    <Icon className="w-4 h-4" />
-    <span className="font-medium">{text}</span>
-  </button>
-);
-
-// Mobile Navigation Link Component
-const MobileNavLink = ({ icon: Icon, text, active = false }) => (
-  <button
-    className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-lg transition-colors ${
-      active ? 'text-blue-600' : 'text-gray-600'
-    }`}
-  >
-    <Icon className="w-5 h-5" />
-    <span className="text-xs font-medium">{text}</span>
-  </button>
-);
 
 export default Navbar;

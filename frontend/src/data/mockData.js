@@ -37,3 +37,6 @@ export const topTheftHotspots = [
   { id: 2, name: "Rajarampuri", address: "5th Lane, Rajarampuri", cases: 1075674258 },
   { id: 3, name: "Mahadwar Road", address: "Opp. Ambabai Temple", cases: 923456789 },
 ];
+
+export const locations = ["Shahupuri", "Rajarampuri", "Vagda Park", "Mahadwar Road", "Indumati Road"];
+export const theftMethods = ["Lock Broken", "Hotwired", "Key left-in", "Lifted Away"];
