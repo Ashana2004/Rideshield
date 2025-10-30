@@ -10,100 +10,93 @@ const Reports = () => {
   const [locationFilter, setLocationFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [downloadMenuOpen, setDownloadMenuOpen] = useState(false);
-  const [filters, setFilters] = useState({
-    dateFrom: '',
-    dateTo: '',
-    localities: [],
-    company: '',
-    model: '',
-    dayOrNight: '',
-    theftMethods: []
-  });
 
-  // Fetch reports from backend
+  // Mock data - replace with actual API calls
   useEffect(() => {
-    fetchReports();
-  }, []);
-
-  const fetchReports = async () => {
-    try {
-      setLoading(true);
-      // Build query parameters from filters
-      const params = new URLSearchParams();
-      
-      if (filters.dateFrom) params.append('date_from', filters.dateFrom);
-      if (filters.dateTo) params.append('date_to', filters.dateTo);
-      if (filters.localities.length > 0) params.append('localities', filters.localities.join(','));
-      if (filters.company) params.append('company', filters.company);
-      if (filters.model) params.append('model', filters.model);
-      if (filters.dayOrNight) params.append('day_night', filters.dayOrNight);
-      if (filters.theftMethods.length > 0) params.append('theft_methods', filters.theftMethods.join(','));
-
-      const response = await fetch(`http://127.0.0.1:8000/api/reports?${params}`);
-      const data = await response.json();
-      
-      setReports(data.reports || []);
-      setFilteredReports(data.reports || []);
-    } catch (error) {
-      console.error('Error fetching reports:', error);
-      // Fallback to mock data if API fails
-      loadMockData();
-    } finally {
+    // Simulate API call
+    setTimeout(() => {
+      const mockReports = [
+        {
+          id: 1,
+          reportId: 'RPT-001',
+          bikeModel: 'Honda Activa',
+          licensePlate: 'MH09AB1234',
+          color: 'Black',
+          location: 'Shahupuri',
+          theftDate: '2024-01-15',
+          theftTime: '14:30',
+          status: 'Under Investigation',
+          submittedDate: '2024-01-15',
+          officer: 'Officer Patil',
+          contactNumber: '9876543210',
+          description: 'Stolen from parking lot'
+        },
+        {
+          id: 2,
+          reportId: 'RPT-002',
+          bikeModel: 'Bajaj Pulsar',
+          licensePlate: 'MH09CD5678',
+          color: 'Red',
+          location: 'Rajarampuri',
+          theftDate: '2024-01-14',
+          theftTime: '20:15',
+          status: 'Case Closed',
+          submittedDate: '2024-01-14',
+          officer: 'Officer Desai',
+          contactNumber: '9876543211',
+          description: 'Recovered near market area'
+        },
+        {
+          id: 3,
+          reportId: 'RPT-003',
+          bikeModel: 'TVS Jupiter',
+          licensePlate: 'MH09EF9012',
+          color: 'White',
+          location: 'Mahadwar Road',
+          theftDate: '2024-01-13',
+          theftTime: '09:45',
+          status: 'Active',
+          submittedDate: '2024-01-13',
+          officer: 'Officer Kulkarni',
+          contactNumber: '9876543212',
+          description: 'Stolen during night'
+        },
+        {
+          id: 4,
+          reportId: 'RPT-004',
+          bikeModel: 'Hero Splendor',
+          licensePlate: 'MH09GH3456',
+          color: 'Blue',
+          location: 'Shahupuri',
+          theftDate: '2024-01-12',
+          theftTime: '16:20',
+          status: 'Under Investigation',
+          submittedDate: '2024-01-12',
+          officer: 'Officer Patil',
+          contactNumber: '9876543213',
+          description: 'Stolen from residential area'
+        },
+        {
+          id: 5,
+          reportId: 'RPT-005',
+          bikeModel: 'Yamaha MT',
+          licensePlate: 'MH09IJ7890',
+          color: 'Green',
+          location: 'Rajarampuri',
+          theftDate: '2024-01-11',
+          theftTime: '22:10',
+          status: 'Case Closed',
+          submittedDate: '2024-01-11',
+          officer: 'Officer Desai',
+          contactNumber: '9876543214',
+          description: 'Vehicle recovered with damage'
+        }
+      ];
+      setReports(mockReports);
+      setFilteredReports(mockReports);
       setLoading(false);
-    }
-  };
-
-  const loadMockData = () => {
-    const mockReports = [
-      {
-        id: 1,
-        reportId: 'RPT-001',
-        bikeModel: 'Honda Activa',
-        licensePlate: 'MH09AB1234',
-        color: 'Black',
-        location: 'Shahupuri',
-        theftDate: '2024-01-15',
-        theftTime: '14:30',
-        status: 'Under Investigation',
-        submittedDate: '2024-01-15',
-        officer: 'Officer Patil',
-        contactNumber: '9876543210',
-        description: 'Stolen from parking lot'
-      },
-      {
-        id: 2,
-        reportId: 'RPT-002',
-        bikeModel: 'Bajaj Pulsar',
-        licensePlate: 'MH09CD5678',
-        color: 'Red',
-        location: 'Rajarampuri',
-        theftDate: '2024-01-14',
-        theftTime: '20:15',
-        status: 'Case Closed',
-        submittedDate: '2024-01-14',
-        officer: 'Officer Desai',
-        contactNumber: '9876543211',
-        description: 'Recovered near market area'
-      },
-      {
-        id: 3,
-        reportId: 'RPT-003',
-        bikeModel: 'TVS Jupiter',
-        licensePlate: 'MH09EF9012',
-        color: 'White',
-        location: 'Mahadwar Road',
-        theftDate: '2024-01-13',
-        theftTime: '09:45',
-        status: 'Active',
-        submittedDate: '2024-01-13',
-        officer: 'Officer Kulkarni',
-        contactNumber: '9876543212',
-        description: 'Stolen during night'
-      }
-    ];
-    setReports(mockReports);
-    setFilteredReports(mockReports);
-  };
+    }, 1000);
+  }, []);
 
   // Apply filters
   useEffect(() => {
@@ -133,26 +126,18 @@ const Reports = () => {
     setFilteredReports(filtered);
   }, [searchTerm, dateFilter, statusFilter, locationFilter, reports]);
 
+  // Calculate statistics
+  const totalReports = reports.length;
+  const underInvestigation = reports.filter(r => r.status === 'Under Investigation').length;
+  const casesClosed = reports.filter(r => r.status === 'Case Closed').length;
+  const filteredCount = filteredReports.length;
+
   // Download functions
   const downloadPDF = async () => {
     try {
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value && value.length > 0) {
-          params.append(key, Array.isArray(value) ? value.join(',') : value);
-        }
-      });
-
-      const response = await fetch(`http://127.0.0.1:8000/api/reports/download/pdf?${params}`);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `theft-reports-${new Date().toISOString().split('T')[0]}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Simulate PDF download
+      alert('PDF download started! This would download filtered reports in PDF format.');
+      console.log('Downloading PDF with', filteredCount, 'reports');
     } catch (error) {
       console.error('Error downloading PDF:', error);
       alert('Error downloading PDF report');
@@ -161,23 +146,9 @@ const Reports = () => {
 
   const downloadCSV = async () => {
     try {
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value && value.length > 0) {
-          params.append(key, Array.isArray(value) ? value.join(',') : value);
-        }
-      });
-
-      const response = await fetch(`http://127.0.0.1:8000/api/reports/download/csv?${params}`);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `theft-reports-${new Date().toISOString().split('T')[0]}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Simulate CSV download
+      alert('CSV download started! This would download filtered reports in CSV format.');
+      console.log('Downloading CSV with', filteredCount, 'reports');
     } catch (error) {
       console.error('Error downloading CSV:', error);
       alert('Error downloading CSV report');
@@ -186,23 +157,9 @@ const Reports = () => {
 
   const downloadWord = async () => {
     try {
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value && value.length > 0) {
-          params.append(key, Array.isArray(value) ? value.join(',') : value);
-        }
-      });
-
-      const response = await fetch(`http://127.0.0.1:8000/api/reports/download/word?${params}`);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `theft-reports-${new Date().toISOString().split('T')[0]}.docx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Simulate Word download
+      alert('Word download started! This would download filtered reports in Word format.');
+      console.log('Downloading Word with', filteredCount, 'reports');
     } catch (error) {
       console.error('Error downloading Word:', error);
       alert('Error downloading Word report');
@@ -240,6 +197,10 @@ const Reports = () => {
     return [...new Set(reports.map(report => report.location))];
   };
 
+  const getUniqueDates = () => {
+    return [...new Set(reports.map(report => report.theftDate))];
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -258,6 +219,57 @@ const Reports = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Theft Reports</h1>
           <p className="text-gray-600">Manage and download bike theft reports with applied filters</p>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="bg-blue-100 p-3 rounded-lg">
+                <FileText className="w-6 h-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Reports</p>
+                <p className="text-2xl font-bold text-gray-900">{totalReports}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="bg-yellow-100 p-3 rounded-lg">
+                <Filter className="w-6 h-6 text-yellow-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Under Investigation</p>
+                <p className="text-2xl font-bold text-gray-900">{underInvestigation}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="bg-green-100 p-3 rounded-lg">
+                <BarChart3 className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Cases Closed</p>
+                <p className="text-2xl font-bold text-gray-900">{casesClosed}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="bg-purple-100 p-3 rounded-lg">
+                <Download className="w-6 h-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Filtered</p>
+                <p className="text-2xl font-bold text-gray-900">{filteredCount}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Filters and Actions */}
@@ -283,9 +295,11 @@ const Reports = () => {
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">All Dates</option>
-                <option value="2024-01-15">Jan 15, 2024</option>
-                <option value="2024-01-14">Jan 14, 2024</option>
-                <option value="2024-01-13">Jan 13, 2024</option>
+                {getUniqueDates().map(date => (
+                  <option key={date} value={date}>
+                    {new Date(date).toLocaleDateString()}
+                  </option>
+                ))}
               </select>
 
               <select
@@ -353,9 +367,9 @@ const Reports = () => {
           {/* Applied Filters Info */}
           <div className="mt-4 p-3 bg-blue-50 rounded-lg">
             <p className="text-sm text-blue-800">
-              <strong>Applied Filters:</strong> {filteredReports.length} reports found
+              <strong>Applied Filters:</strong> {filteredCount} reports found
               {searchTerm && ` • Search: "${searchTerm}"`}
-              {dateFilter && ` • Date: ${dateFilter}`}
+              {dateFilter && ` • Date: ${new Date(dateFilter).toLocaleDateString()}`}
               {statusFilter !== 'all' && ` • Status: ${statusFilter}`}
               {locationFilter !== 'all' && ` • Location: ${locationFilter}`}
             </p>
@@ -452,61 +466,6 @@ const Reports = () => {
               <p className="text-gray-400 text-sm">Try adjusting your search or filters</p>
             </div>
           )}
-        </div>
-
-        {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <FileText className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Reports</p>
-                <p className="text-2xl font-bold text-gray-900">{reports.length}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="bg-yellow-100 p-3 rounded-lg">
-                <Filter className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Under Investigation</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {reports.filter(r => r.status === 'Under Investigation').length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="bg-green-100 p-3 rounded-lg">
-                <BarChart3 className="w-6 h-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Cases Closed</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {reports.filter(r => r.status === 'Case Closed').length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="bg-purple-100 p-3 rounded-lg">
-                <Download className="w-6 h-6 text-purple-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Filtered</p>
-                <p className="text-2xl font-bold text-gray-900">{filteredReports.length}</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
