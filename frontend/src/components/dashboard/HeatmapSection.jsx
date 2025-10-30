@@ -82,11 +82,10 @@ const HeatmapSection = () => {
                   />
                 ))}
               </MapContainer>
-
-              {/* Centered Popup */}
+ 
               {selectedTheft && (
                 <>
-                  {/* Dark overlay */}
+                 
                   <div className="fixed inset-0 bg-black bg-opacity-40 z-[9998]" />
 
                   {/* Popup Box */}
@@ -105,8 +104,7 @@ const HeatmapSection = () => {
                       <p className="text-gray-700"><span className="font-semibold text-gray-900">Time:</span> {selectedTheft.Time_of_day?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
                       <p className="text-gray-700"><span className="font-semibold text-gray-900">Day:</span> {selectedTheft.DAY?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
                     </div>
-                    
-                    {/* Close Button */}
+                     
                     <button
                       className="mt-6 w-full py-2 bg-blue-600 text-white font-semibold rounded-xl shadow hover:bg-blue-700 transition duration-200"
                       onClick={() => setSelectedTheft(null)}
