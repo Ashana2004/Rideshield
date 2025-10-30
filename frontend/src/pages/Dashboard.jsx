@@ -30,9 +30,9 @@ export default function Dashboard() {
       .then(data => setTotalThefts(data.total_thefts))
       .catch(err => console.error(err));
 
-    fetch("http://127.0.0.1:8000/api/highest-area")
+    fetch("http://127.0.0.1:8000/api/higest-police-station")
       .then(res => res.json())
-      .then(data => setHighestRiskArea(`${data.highest_area} (${data.thefts})`))
+      .then(data => setHighestRiskArea(`${data.station} (${data.thefts})`))
       .catch(err => console.error(err));
 
     fetch("http://127.0.0.1:8000/api/most-model")
@@ -42,7 +42,7 @@ export default function Dashboard() {
 
     fetch("http://127.0.0.1:8000/api/peak-time")
       .then(res => res.json())
-      .then(data => setPeakTheftTime(`${data.peak_hour} (${data.count})`))
+      .then(data => setPeakTheftTime(`${data.time_slot} (${data.time})`))
       .catch(err => console.error(err));
   }, []);
 

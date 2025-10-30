@@ -3,30 +3,41 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recha
 import { COLORS } from '../../data/mockData';
 
 const TheftByCompanyChart = () => {
-  const [dayNightByCompany, setDayNightByCompany] = useState([]);
+  const [companyTimeData, setCompanyTimeData] = useState([]);
   const [compareData, setCompareData] = useState([]);
   const [activeTab, setActiveTab] = useState('compare');
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/day-night-by-company")
+    const time_slots = ["Morning", "Afternoon", "Evening", "Midnight"];
+
+    // 🔹 First API: model/time-slot data
+    fetch("http://127.0.0.1:8000/api/Time_slot-by-company")
       .then(res => res.json())
       .then(data => {
-        const daynight = [
-          { name: "Day", value: data.data.reduce((sum, item) => sum + item.Day, 0) },
-          { name: "Night", value: data.data.reduce((sum, item) => sum + item.Night, 0) }
-        ];
-        const compare = data.data.map(item => ({
-          name: item.company,
-          value: item.Day + item.Night
+        // Create combined data for pie chart
+        const dayNightTotals = time_slots.map(slot => ({
+          name: slot,
+          value: data.data.reduce((sum, company) => sum + (company[slot] || 0), 0),
         }));
 
-        setDayNightByCompany(daynight);
-        setCompareData(compare);
+        // 🔹 Second API: company theft totals
+        fetch("http://127.0.0.1:8000/api/thefts-company")
+          .then(res => res.json())
+          .then(companyData => {
+            const companyTotals = companyData.data.map(item => ({
+              name: item.company,
+              value: item.count 
+            }));
+
+            setCompanyTimeData(dayNightTotals);
+            setCompareData(companyTotals);
+          })
+          .catch(err => console.error("Error fetching theft-company:", err));
       })
-      .catch(err => console.error(err));
+      .catch(err => console.error("Error fetching time-slot-by-company:", err));
   }, []);
 
-  const chartData = activeTab === "daynight" ? dayNightByCompany : compareData;
+  const chartData = activeTab === "daynight" ? companyTimeData : compareData;
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -35,7 +46,7 @@ const TheftByCompanyChart = () => {
       {/* Tabs */}
       <div className="mb-4">
         <div className="flex border-b">
-          {["compare", "daynight", "method"].map(tab => (
+          {["compare", "daynight"].map(tab => (
             <button
               key={tab}
               className={`py-2 px-4 text-sm font-medium rounded-t-md ${
