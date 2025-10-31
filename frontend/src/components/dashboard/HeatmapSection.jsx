@@ -5,23 +5,54 @@ import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import L from "leaflet";
 import "../../App.css";
 
-const HeatmapSection = () => {
-  const baseUrl = "http://127.0.0.1:8000/api/thefts-heatmap";
+const HeatmapSection = ({ filters }) => {
   const [activeTab, setActiveTab] = useState('heatmap');
   const [theftData, setTheftData] = useState([]);
   const [selectedTheft, setSelectedTheft] = useState(null);
 
+  // Helper function to build query string from filters
+  const buildQueryString = () => {
+    const params = new URLSearchParams();
+    
+    if (filters.localities && filters.localities.length > 0) {
+      params.append('localities', filters.localities.join(','));
+    }
+    if (filters.places && filters.places.length > 0) {
+      params.append('places', filters.places.join(','));
+    }
+    if (filters.company) {
+      params.append('company', filters.company);
+    }
+    if (filters.categories && filters.categories.length > 0) {
+      params.append('categories', filters.categories.join(','));
+    }
+    if (filters.timeOfDay && filters.timeOfDay !== "All") {
+      params.append('time_of_day', filters.timeOfDay);
+    }
+    if (filters.days && filters.days.length > 0) {
+      params.append('days', filters.days.join(','));
+    }
+    if (filters.spotTypes && filters.spotTypes.length > 0) {
+      params.append('spot_types', filters.spotTypes.join(','));
+    }
+    
+    return params.toString();
+  };
+
+  const queryString = buildQueryString();
+  const baseUrl = `http://127.0.0.1:8000/api/thefts-heatmap?${queryString}`;
+
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/theft-data")
+    fetch(`http://127.0.0.1:8000/api/theft-data?${queryString}`)
       .then(res => res.json())
       .then(theft => setTheftData(theft.data))
       .catch(err => console.error("Error fetching theft-data:", err));
-  }, []);
+  }, [queryString]);
 
   const smallIcon = new L.Icon.Default({
     iconSize: [15, 25],
     iconAnchor: [7, 25],
-    shadowUrl: undefined,   // remove shadow
+    shadowUrl: undefined,
     shadowSize: [0, 0],
     shadowAnchor: [0, 0],
   });
@@ -85,17 +116,13 @@ const HeatmapSection = () => {
  
               {selectedTheft && (
                 <>
-                 
                   <div className="fixed inset-0 bg-black bg-opacity-40 z-[9998]" />
 
-                  {/* Popup Box */}
                   <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
                                   bg-gradient-to-br from-white to-gray-100 p-6 rounded-2xl shadow-2xl z-[9999] w-96 pointer-events-auto border border-gray-200">
                     
-                    {/* Header */}
                     <h2 className="font-bold text-2xl mb-5 text-center text-gray-800 tracking-wide">Theft Details</h2>
                     
-                    {/* Details */}
                     <div className="space-y-3">
                       <p className="text-gray-700"><span className="font-semibold text-gray-900">Place:</span> {selectedTheft.PLACE?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
                       <p className="text-gray-700"><span className="font-semibold text-gray-900">Police Station:</span> {selectedTheft.POLICE_STATION?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
@@ -112,8 +139,6 @@ const HeatmapSection = () => {
                       Close
                     </button>
                   </div>
-
-
                 </>
               )}
             </div>

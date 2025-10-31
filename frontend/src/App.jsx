@@ -40,11 +40,7 @@ function App() {
       
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        {isSidebarOpen && (
-          <div className="w-72 flex-shrink-0 bg-white border-r border-gray-200 overflow-y-auto">
-            <Sidebar />
-          </div>
-        )}
+        
         
         {/* Main Content */}
         <main className="flex-1 overflow-auto">

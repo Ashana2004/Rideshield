@@ -7,8 +7,23 @@ import Checkbox from '../ui/Checkbox';
 import Select from '../ui/Select';
 import RadioGroup from '../ui/RadioGroup';
 
-const Sidebar = () => {
-  // Actual options from the dataset
+const Sidebar = ({ filters = {}, setFilters }) => {
+  // Provide default values if filters is undefined or missing properties
+  const safeFilters = {
+    dateFrom: "",
+    dateTo: "",
+    timeFrom: "",
+    timeTo: "",
+    localities: [],
+    places: [],
+    company: "",
+    categories: [],
+    timeOfDay: "All",
+    days: [],
+    spotTypes: [],
+    ...filters // Override with actual filter values if they exist
+  };
+
   const policeStations = [
     "AJARA", "BHUDARGAD", "CHANDGAD", "GADHINGLAJ", "GAGAN BAWADA", 
     "GANDHINAGAR", "GOKUL SHIRGAON", "HATKANAGALE", "HUPARI", "ICHALKARANJI",
@@ -39,22 +54,54 @@ const Sidebar = () => {
     "PUBLIC PLACE", "HAWKERS ZONE"
   ];
 
-  // Extract unique places from the data (limited to most common for usability)
   const commonPlaces = [
     "KOLHAPUR", "ICHALKARANJI", "GADHINGLAJ", "KAGAL", "HATKANAGALE",
     "JAYSINGPUR", "SHAHAPUR", "GOKUL SHIRGAON", "AJARA", "BHUDARGAD",
     "CHANDGAD", "HUPARI", "KARVIR", "KODOLI", "PANHALA"
   ];
 
+  const handleCheckboxChange = (filterKey, value) => {
+    if (!setFilters) return;
+    
+    setFilters(prev => {
+      const currentValues = prev[filterKey] || [];
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter(v => v !== value)
+        : [...currentValues, value];
+      return { ...prev, [filterKey]: newValues };
+    });
+  };
+
+  const handleSelectChange = (filterKey, value) => {
+    if (!setFilters) return;
+    setFilters(prev => ({ ...prev, [filterKey]: value }));
+  };
+
+  const handleRadioChange = (filterKey, value) => {
+    if (!setFilters) return;
+    setFilters(prev => ({ ...prev, [filterKey]: value }));
+  };
+
   const handleResetFilters = () => {
-    // Add logic to reset all filters
-    console.log("Resetting all filters");
-    // You can implement filter reset logic here
+    if (!setFilters) return;
+    
+    setFilters({
+      dateFrom: "",
+      dateTo: "",
+      timeFrom: "",
+      timeTo: "",
+      localities: [],
+      places: [],
+      company: "",
+      categories: [],
+      timeOfDay: "All",
+      days: [],
+      spotTypes: []
+    });
   };
 
   return (
     <aside className="w-80 h-screen bg-white flex flex-col border-r border-gray-200">
-      {/* Sticky Header - Fixed at top */}
       <div className="flex-shrink-0 p-6 border-b border-gray-200 bg-white z-10">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold flex items-center text-gray-800">
@@ -64,17 +111,24 @@ const Sidebar = () => {
         </div>
       </div>
       
-      {/* Scrollable Filter Content - Takes remaining space */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-6 space-y-6 pb-4">
           {/* Date Range */}
           <FilterSection title="Date Range">
             <div className="flex space-x-2">
               <div className="flex-1">
-                <DatePicker label="From" />
+                <DatePicker 
+                  label="From" 
+                  value={safeFilters.dateFrom}
+                  onChange={(e) => handleSelectChange('dateFrom', e.target.value)}
+                />
               </div>
               <div className="flex-1">
-                <DatePicker label="To" />
+                <DatePicker 
+                  label="To"
+                  value={safeFilters.dateTo}
+                  onChange={(e) => handleSelectChange('dateTo', e.target.value)}
+                />
               </div>
             </div>
           </FilterSection>
@@ -83,11 +137,19 @@ const Sidebar = () => {
           <FilterSection title="Time Range">
             <div className="flex space-x-2 items-center">
               <div className="flex-1">
-                <TimePicker label="From" />
+                <TimePicker 
+                  label="From"
+                  value={safeFilters.timeFrom}
+                  onChange={(e) => handleSelectChange('timeFrom', e.target.value)}
+                />
               </div>
               <span className="text-gray-400 text-sm">to</span>
               <div className="flex-1">
-                <TimePicker label="To" />
+                <TimePicker 
+                  label="To"
+                  value={safeFilters.timeTo}
+                  onChange={(e) => handleSelectChange('timeTo', e.target.value)}
+                />
               </div>
             </div>
           </FilterSection>
@@ -99,7 +161,9 @@ const Sidebar = () => {
                 <div key={ps} className="flex items-center space-x-3">
                   <Checkbox 
                     label={ps} 
-                    icon={<Shield className="w-4 h-4 text-green-600" />} 
+                    icon={<Shield className="w-4 h-4 text-green-600" />}
+                    checked={safeFilters.localities?.includes(ps)}
+                    onChange={() => handleCheckboxChange('localities', ps)}
                   />
                 </div>
               ))}
@@ -113,7 +177,9 @@ const Sidebar = () => {
                 <div key={place} className="flex items-center space-x-3">
                   <Checkbox 
                     label={place} 
-                    icon={<MapPin className="w-4 h-4 text-blue-500" />} 
+                    icon={<MapPin className="w-4 h-4 text-blue-500" />}
+                    checked={safeFilters.places?.includes(place)}
+                    onChange={() => handleCheckboxChange('places', place)}
                   />
                 </div>
               ))}
@@ -127,7 +193,9 @@ const Sidebar = () => {
                 <div key={cat} className="flex items-center space-x-3">
                   <Checkbox 
                     label={cat} 
-                    icon={<Tag className="w-4 h-4 text-purple-500" />} 
+                    icon={<Tag className="w-4 h-4 text-purple-500" />}
+                    checked={safeFilters.categories?.includes(cat)}
+                    onChange={() => handleCheckboxChange('categories', cat)}
                   />
                 </div>
               ))}
@@ -139,7 +207,9 @@ const Sidebar = () => {
             <Select 
               placeholder="Select Vehicle Make" 
               options={makes} 
-              icon={<Building className="w-4 h-4 text-yellow-500" />} 
+              icon={<Building className="w-4 h-4 text-yellow-500" />}
+              value={safeFilters.company}
+              onChange={(e) => handleSelectChange('company', e.target.value)}
             />
           </FilterSection>
 
@@ -150,7 +220,9 @@ const Sidebar = () => {
                 <div key={spot} className="flex items-center space-x-3">
                   <Checkbox 
                     label={spot} 
-                    icon={<MapPin className="w-4 h-4 text-orange-500" />} 
+                    icon={<MapPin className="w-4 h-4 text-orange-500" />}
+                    checked={safeFilters.spotTypes?.includes(spot)}
+                    onChange={() => handleCheckboxChange('spotTypes', spot)}
                   />
                 </div>
               ))}
@@ -162,7 +234,8 @@ const Sidebar = () => {
             <div className="space-y-3">
               <RadioGroup 
                 options={timeOfDay} 
-                defaultValue="All" 
+                value={safeFilters.timeOfDay || "All"}
+                onChange={(value) => handleRadioChange('timeOfDay', value)}
                 icons={{
                   "Morning": <Sun className="w-4 h-4 text-yellow-500" />,
                   "Afternoon": <Sun className="w-4 h-4 text-orange-500" />,
@@ -180,7 +253,9 @@ const Sidebar = () => {
                 <div key={day} className="flex items-center space-x-3">
                   <Checkbox 
                     label={day} 
-                    icon={<Clock className="w-4 h-4 text-red-500" />} 
+                    icon={<Clock className="w-4 h-4 text-red-500" />}
+                    checked={safeFilters.days?.includes(day)}
+                    onChange={() => handleCheckboxChange('days', day)}
                   />
                 </div>
               ))}
@@ -189,7 +264,6 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Sticky Footer with Reset Button - Fixed at bottom */}
       <div className="flex-shrink-0 p-6 border-t border-gray-200 bg-white">
         <button 
           onClick={handleResetFilters}
@@ -200,22 +274,7 @@ const Sidebar = () => {
         </button>
       </div>
 
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f8fafc;
-          border-radius: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #94a3b8;
-        }
-      `}</style>
+ 
     </aside>
   );
 };

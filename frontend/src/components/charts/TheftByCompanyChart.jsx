@@ -2,16 +2,45 @@ import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { COLORS } from '../../data/mockData';
 
-const TheftByCompanyChart = () => {
+const TheftByCompanyChart = ({ filters }) => {
   const [companyTimeData, setCompanyTimeData] = useState([]);
   const [compareData, setCompareData] = useState([]);
   const [activeTab, setActiveTab] = useState('compare');
 
+  const buildQueryString = () => {
+    const params = new URLSearchParams();
+    
+    if (filters.localities && filters.localities.length > 0) {
+      params.append('localities', filters.localities.join(','));
+    }
+    if (filters.places && filters.places.length > 0) {
+      params.append('places', filters.places.join(','));
+    }
+    if (filters.company) {
+      params.append('company', filters.company);
+    }
+    if (filters.categories && filters.categories.length > 0) {
+      params.append('categories', filters.categories.join(','));
+    }
+    if (filters.timeOfDay && filters.timeOfDay !== "All") {
+      params.append('time_of_day', filters.timeOfDay);
+    }
+    if (filters.days && filters.days.length > 0) {
+      params.append('days', filters.days.join(','));
+    }
+    if (filters.spotTypes && filters.spotTypes.length > 0) {
+      params.append('spot_types', filters.spotTypes.join(','));
+    }
+    
+    return params.toString();
+  };
+
   useEffect(() => {
+    const queryString = buildQueryString();
     const time_slots = ["Morning", "Afternoon", "Evening", "Midnight"];
 
-    // 🔹 First API: model/time-slot data
-    fetch("http://127.0.0.1:8000/api/Time_slot-by-company")
+    // First API: model/time-slot data
+    fetch(`http://127.0.0.1:8000/api/Time_slot-by-company?${queryString}`)
       .then(res => res.json())
       .then(data => {
         // Create combined data for pie chart
@@ -20,8 +49,8 @@ const TheftByCompanyChart = () => {
           value: data.data.reduce((sum, company) => sum + (company[slot] || 0), 0),
         }));
 
-        // 🔹 Second API: company theft totals
-        fetch("http://127.0.0.1:8000/api/thefts-company")
+        // Second API: company theft totals
+        fetch(`http://127.0.0.1:8000/api/thefts-company?${queryString}`)
           .then(res => res.json())
           .then(companyData => {
             const companyTotals = companyData.data.map(item => ({
@@ -35,7 +64,7 @@ const TheftByCompanyChart = () => {
           .catch(err => console.error("Error fetching theft-company:", err));
       })
       .catch(err => console.error("Error fetching time-slot-by-company:", err));
-  }, []);
+  }, [filters]); // Re-fetch when filters change
 
   const chartData = activeTab === "daynight" ? companyTimeData : compareData;
 
@@ -56,7 +85,7 @@ const TheftByCompanyChart = () => {
               }`}
               onClick={() => setActiveTab(tab)}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab === "compare" ? "By Company" : "By Time of Day"}
             </button>
           ))}
         </div>
