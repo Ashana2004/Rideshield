@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/layout/Header';
-import Sidebar from '../components/layout/Sidebar';
 import MetricCards from '../components/dashboard/MetricCards';
 import HeatmapSection from '../components/dashboard/HeatmapSection';
 import TheftByCompanyChart from '../components/charts/TheftByCompanyChart';
@@ -8,9 +7,9 @@ import TheftByLocalityChart from '../components/charts/TheftByLocalityChart';
 import TheftTrendsChart from '../components/charts/TheftTrendsChart';
 import MetricDetailsModal from '../components/layout/MetricDetailsModal';
 
-export default function Dashboard() {
-  // Initialize filters with all properties
-  const [filters, setFilters] = useState({
+export default function Dashboard({ isSidebarOpen = true, toggleSidebar, filters: parentFilters, setFilters }) {
+  // Use filters from App (if passed), otherwise local state fallback
+  const [filters, setLocalFilters] = useState(parentFilters || {
     dateFrom: "",
     dateTo: "",
     timeFrom: "",
@@ -24,6 +23,15 @@ export default function Dashboard() {
     spotTypes: []
   });
 
+  // keep parent filters in sync when App passes setFilters
+  useEffect(() => {
+    if (parentFilters) setLocalFilters(parentFilters);
+  }, [parentFilters]);
+
+  useEffect(() => {
+    if (setFilters) setFilters(filters);
+  }, [filters, setFilters]);
+
   const [totalThefts, setTotalThefts] = useState(0);
   const [highestRiskArea, setHighestRiskArea] = useState("");
   const [mostStolenModel, setMostStolenModel] = useState("");
@@ -36,7 +44,6 @@ export default function Dashboard() {
   // Helper function to build query string from filters
   const buildQueryString = (customFilters = filters) => {
     const params = new URLSearchParams();
-    
     if (customFilters.localities && customFilters.localities.length > 0) {
       params.append('localities', customFilters.localities.join(','));
     }
@@ -127,9 +134,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex bg-gray-100 min-h-screen font-sans text-gray-800">
-      {/* Sidebar */}
-      <Sidebar filters={filters} setFilters={setFilters} />
-      
+        
       {/* Main Content */}
       <div className="flex-1">
         <main className="p-4 sm:p-6 lg:p-8">
