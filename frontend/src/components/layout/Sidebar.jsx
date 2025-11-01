@@ -134,25 +134,7 @@ const Sidebar = ({ filters = {}, setFilters }) => {
           </FilterSection>
 
           {/* Time Range */}
-          <FilterSection title="Time Range">
-            <div className="flex space-x-2 items-center">
-              <div className="flex-1">
-                <TimePicker 
-                  label="From"
-                  value={safeFilters.timeFrom}
-                  onChange={(e) => handleSelectChange('timeFrom', e.target.value)}
-                />
-              </div>
-              <span className="text-gray-400 text-sm">to</span>
-              <div className="flex-1">
-                <TimePicker 
-                  label="To"
-                  value={safeFilters.timeTo}
-                  onChange={(e) => handleSelectChange('timeTo', e.target.value)}
-                />
-              </div>
-            </div>
-          </FilterSection>
+          
 
           {/* Police Station */}
           <FilterSection title="Police Station">
@@ -213,21 +195,7 @@ const Sidebar = ({ filters = {}, setFilters }) => {
             />
           </FilterSection>
 
-          {/* Spot Type */}
-          <FilterSection title="Incident Location Type">
-            <div className="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-              {spotTypes.map(spot => (
-                <div key={spot} className="flex items-center space-x-3">
-                  <Checkbox 
-                    label={spot} 
-                    icon={<MapPin className="w-4 h-4 text-orange-500" />}
-                    checked={safeFilters.spotTypes?.includes(spot)}
-                    onChange={() => handleCheckboxChange('spotTypes', spot)}
-                  />
-                </div>
-              ))}
-            </div>
-          </FilterSection>
+    
 
           {/* Time of Day */}
           <FilterSection title="Time of Day">
