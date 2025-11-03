@@ -8,6 +8,12 @@ router = APIRouter()
 import math
 from fastapi.responses import JSONResponse
 import math
+from datetime import datetime
+from fastapi import Query
+import traceback
+from datetime import datetime, timedelta
+import pandas as pd
+from fastapi import HTTPException
 
 @router.get("/total-thefts")
 def get_total_thefts():
@@ -69,19 +75,6 @@ def get_thefts_by_locality():
     data = [{"locality": r["_id"], "count": r["count"]} for r in result]
     return {"data": data}
 
-# @router.get("/theft-trends")
-# def get_theft_trends():
-#     result = thefts_collection.aggregate([
-        
-#         {"$group": {
-#             "_id": {"$DATE": {"format": "%Y-%m-%d", "date": "$datetime"}},
-#             "count": {"$sum": 1}
-#         }},
-#         {"$sort": {"_id": 1}}  
-#     ])
-#     trends = [{"date": r["_id"], "count": r["count"]} for r in result]
-#     return {"data": trends}
- 
  
 def safe_number(value):
     """Convert None, NaN, inf, or invalid numbers to 0."""
@@ -139,7 +132,12 @@ def time_slot_by_company():
                 o[key] = 0.0
 
     return JSONResponse(content={"data": output})
-  
+
+@router.get("/sample-data")
+def get_sample_data():
+    data = list(thefts_collection.find({}, {"_id": 0}).limit(3))
+    return {"sample": data}
+
   
 @router.get("/thefts-company")
 def get_company():
@@ -157,12 +155,11 @@ def get_company():
 def theft_data():
     
     thefts= list(thefts_collection.find({},{"_id":0,"Make":1,"MAKE":1,"Category":1,"PLACE":1,"POLICE_STATION":1,"Time_of_day":1,"DAY":1,"LATITUDE":1,"LONGITUDE":1}))
-    print(thefts   )
+    print(thefts)
     return{"data":thefts}
      
 @router.get("/thefts-heatmap", response_class=HTMLResponse)
 def thefts_heatmap(): 
-    
     thefts = list(thefts_collection.find({}, {"_id": 0, "LATITUDE": 1, "LONGITUDE": 1}))
     heat_data = []
     for t in thefts:
@@ -171,16 +168,99 @@ def thefts_heatmap():
             lon = float(t.get("LONGITUDE", "nan"))
             if math.isnan(lat) or math.isnan(lon):
                 continue
-            # ✅ Ensure lat/lon are in valid range
             if -90 <= lat <= 90 and -180 <= lon <= 180:
                 heat_data.append([lat, lon])
         except (TypeError, ValueError):
             continue
 
-        avg_lat, avg_lon = 16.5777,  74.3155  
+    avg_lat, avg_lon = 16.5777, 74.3155  
  
     m = folium.Map(location=[avg_lat, avg_lon], zoom_start=9.3, tiles="OpenStreetMap")
-    
     HeatMap(heat_data, radius=8, blur=6, min_opacity=0.7).add_to(m)
-    
     return HTMLResponse(content=m.get_root().render())
+
+
+# ✅ FIXED & UPDATED ENDPOINT BELOW
+@router.post("/generate-report")
+def generate_report(
+    police_station: str = Query(None),
+    start_date: str = Query(None),
+    end_date: str = Query(None)
+):
+    try:
+        query = {}
+        if police_station:
+            query["POLICE_STATION"] = police_station.upper()
+
+        data = list(thefts_collection.find(query, {"_id": 0}))
+        if not data:
+            return {"message": "No data found in DB."}
+
+        df = pd.DataFrame(data)
+
+        # Convert your date format safely (e.g. '27.7.25')
+        def parse_custom_date(date_str):
+            for fmt in ("%d.%m.%y", "%d.%m.%Y"):
+                try:
+                    return datetime.strptime(date_str, fmt)
+                except Exception:
+                    continue
+            return pd.NaT
+
+        df["DATE"] = df["DATE"].astype(str).apply(parse_custom_date)
+
+        if start_date and end_date:
+            start_dt = pd.to_datetime(start_date)
+            end_dt = pd.to_datetime(end_date)
+            df = df[(df["DATE"] >= start_dt) & (df["DATE"] <= end_dt)]
+
+        if df.empty:
+            return {"message": "No data found for the given date range."}
+
+        # ----------------- REPORT METRICS -----------------
+        total_thefts = len(df)
+        most_targeted_station = df["POLICE_STATION"].value_counts().idxmax()
+        most_common_time = df["Time_of_day"].value_counts().idxmax()
+        most_stolen_model = df["MAKE"].value_counts().idxmax()
+        highest_theft_day = df["DATE"].value_counts().idxmax().strftime("%Y-%m-%d")
+
+        # ----------------- ADDITIONAL METRICS -----------------
+        # Calculate Average per Day
+        num_days = (end_dt - start_dt).days + 1
+        avg_per_day = round(total_thefts / num_days, 2) if num_days > 0 else 0
+
+        # ----------------- REPORT HEADER DATA -----------------
+        report_title = "Bike Theft Analysis Report"
+        date_range = f"{start_date} to {end_date}"
+        generated_on = datetime.now().strftime("%Y-%m-%d")
+
+        # ----------------- SUMMARY TEXT -----------------
+        summary_text = (
+            f"Between {start_date} and {end_date}, there were {total_thefts} bike thefts. "
+            f"The most targeted police station was {most_targeted_station}, "
+            f"with most thefts during {most_common_time.lower()} hours. "
+            f"The most stolen model was {most_stolen_model}. "
+            f"The busiest day was {highest_theft_day}."
+        )
+
+        # ----------------- FINAL RESPONSE -----------------
+        return JSONResponse(content={
+            "Report_Title": report_title,
+            "Date_Range": date_range,
+            "Generated_On": generated_on,
+            "Total_Thefts": total_thefts,
+            "Average_Per_Day": avg_per_day,
+            "Most_Targeted_Station": most_targeted_station,
+            "Most_Common_Time": most_common_time,
+            "Most_Stolen_Model": most_stolen_model,
+            "Highest_Theft_Day": highest_theft_day,
+            "Summary": summary_text
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+

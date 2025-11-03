@@ -2,7 +2,7 @@ import pandas as pd
 from pymongo import MongoClient
 
 # 1. Load CSV file
-file_path = r"C:\Users\ROHIT\Downloads\cleaned_data (2).csv"
+file_path = r"C:\Users\chava\Downloads\cleaned_data (2).csv"
 df = pd.read_csv(file_path)
 
 # 2. Connect to MongoDB (make sure MongoDB service is running locally)
