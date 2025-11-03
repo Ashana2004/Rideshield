@@ -1,0 +1,4 @@
+# Project Python dependencies. Backend-specific requirements are in `backend/requirements.txt`.
+-r backend/requirements.txt
+
+# If you add Python dependencies for frontend tooling (rare), list them here.

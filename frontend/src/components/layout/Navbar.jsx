@@ -43,7 +43,7 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, onTheftEntryClick }) => {
           >
             {isSidebarOpen ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
           </button>
-          
+          <Link to="/newreport" className="px-3 py-2 hover:bg-gray-100 rounded">New Report</Link>
           <Link to="/" className="flex items-center space-x-3">
             <Shield className="w-8 h-8 text-blue-600" />
             <div>
