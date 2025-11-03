@@ -1,5 +1,29 @@
 import React, { useState } from 'react';
 import { X, Camera, MapPin, Calendar, Clock, Bike } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix Leaflet marker icons
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
+function LocationMarker({ onSelect }) {
+  const [position, setPosition] = useState(null);
+
+  useMapEvents({
+    click(e) {
+      setPosition(e.latlng);
+      onSelect(e.latlng);
+    },
+  });
+
+  return position ? <Marker position={position}></Marker> : null;
+}
 
 const TheftEntryModal = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -24,10 +48,17 @@ const TheftEntryModal = ({ isOpen, onClose, onSubmit }) => {
     }));
   };
 
+  const handleMapSelect = (coords) => {
+    setFormData(prev => ({
+      ...prev,
+      latitude: coords.lat.toFixed(6),
+      longitude: coords.lng.toFixed(6),
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validate coordinates if provided
     if (formData.latitude || formData.longitude) {
       const lat = parseFloat(formData.latitude);
       const lng = parseFloat(formData.longitude);
@@ -182,6 +213,7 @@ const TheftEntryModal = ({ isOpen, onClose, onSubmit }) => {
             />
           </div>
 
+          {/* Latitude/Longitude + Map */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -216,6 +248,25 @@ const TheftEntryModal = ({ isOpen, onClose, onSubmit }) => {
                 placeholder="e.g., 74.2433"
               />
             </div>
+          </div>
+
+          {/* Map Picker */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Click on map to select coordinates
+            </label>
+            <MapContainer
+              center={[16.705, 74.2433]}
+              zoom={8}
+              scrollWheelZoom={true}
+              className="h-64 w-full rounded-lg z-0"
+            >
+              <TileLayer
+                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <LocationMarker onSelect={handleMapSelect} />
+            </MapContainer>
           </div>
 
           <div>

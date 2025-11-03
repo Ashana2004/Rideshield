@@ -17,7 +17,7 @@ const MetricDetailsModal = ({ isOpen, onClose, metricType, data }) => {
             { label: 'Resolved Cases', value: data.resolved || 'N/A' },
             { label: 'Under Investigation', value: data.investigation || 'N/A' }
           ]
-        };
+        };   
       
       case 'highestRiskArea':
         return {

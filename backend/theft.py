@@ -37,7 +37,7 @@ def build_filter_query(
     
     # Company/Make filter
     if company:
-        query["MAKE"] = company
+        query["Make"] = company
     
     # Category filter
     if categories and len(categories) > 0:
@@ -356,7 +356,8 @@ def theft_data(
             "Time_of_day": 1,
             "DAY": 1,
             "LATITUDE": 1,
-            "LONGITUDE": 1
+            "LONGITUDE": 1,
+            "DATE": 1
         }
     ))
     

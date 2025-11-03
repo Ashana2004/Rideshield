@@ -10,7 +10,7 @@ const MetricCards = ({ totalThefts, highestRiskArea, mostStolenModel, peakTheftT
       value={totalThefts} 
       subtitle="Based on current filters" 
       onClick={() => onMetricClick('totalThefts')}
-    />
+    /> 
     <MetricCard 
       icon={MapPin} 
       title="Highest Theft Record to Police Station" 

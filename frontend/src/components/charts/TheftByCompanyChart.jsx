@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { COLORS } from '../../data/mockData';
+ 
 
 const TheftByCompanyChart = ({ filters }) => {
   const [companyTimeData, setCompanyTimeData] = useState([]);
   const [compareData, setCompareData] = useState([]);
   const [activeTab, setActiveTab] = useState('compare');
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A569BD', '#E74C3C'];
 
   const buildQueryString = () => {
     const params = new URLSearchParams();

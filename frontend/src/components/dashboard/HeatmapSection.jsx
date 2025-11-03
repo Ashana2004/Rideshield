@@ -129,6 +129,7 @@ const HeatmapSection = ({ filters }) => {
                       <p className="text-gray-700"><span className="font-semibold text-gray-900">Category:</span> {selectedTheft.Category?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
                       <p className="text-gray-700"><span className="font-semibold text-gray-900">Make:</span> {selectedTheft.Make?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
                       <p className="text-gray-700"><span className="font-semibold text-gray-900">Time:</span> {selectedTheft.Time_of_day?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
+                      <p className="text-gray-700"><span className="font-semibold text-gray-900">DATE:</span> {selectedTheft.DATE?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
                       <p className="text-gray-700"><span className="font-semibold text-gray-900">Day:</span> {selectedTheft.DAY?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
                     </div>
                      

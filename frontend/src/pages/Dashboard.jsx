@@ -163,6 +163,7 @@ export default function Dashboard({ isSidebarOpen = true, toggleSidebar, filters
 
               <div>
                 <TheftByCompanyChart filters={filters} />
+                console.log("Chart data:", someDataVariable);
               </div>
 
               <div className="lg:col-span-2">
