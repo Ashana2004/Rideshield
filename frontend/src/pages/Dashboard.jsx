@@ -7,7 +7,7 @@ import TheftByLocalityChart from '../components/charts/TheftByLocalityChart';
 import TheftTrendsChart from '../components/charts/TheftTrendsChart';
 import MetricDetailsModal from '../components/layout/MetricDetailsModal';
 
-export default function Dashboard({ isSidebarOpen = true, toggleSidebar, filters: parentFilters, setFilters }) {
+export default function Dashboard({   filters: parentFilters, setFilters }) {
   // Use filters from App (if passed), otherwise local state fallback
   const [filters, setLocalFilters] = useState(parentFilters || {
     dateFrom: "",

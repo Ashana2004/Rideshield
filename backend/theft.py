@@ -105,7 +105,7 @@ def highest_police_station(
         {"$match": query},
         {"$group": {"_id": "$POLICE_STATION", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}},
-        {"$limit": 1}
+        
     ]
     
     result = thefts_collection.aggregate(pipeline)

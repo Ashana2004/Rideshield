@@ -12,7 +12,7 @@ const MetricDetailsModal = ({ isOpen, onClose, metricType, data }) => {
         .then(response => {
           const sortedStations = response.data
             .sort((a, b) => b.count - a.count)
-            .slice(0, 5); // Get top 5 stations
+            .slice(0, 5);  
           setTopStations(sortedStations);
         })
         .catch(err => console.error("Error fetching top stations:", err));
@@ -128,8 +128,10 @@ const MetricDetailsModal = ({ isOpen, onClose, metricType, data }) => {
 
         {/* Content */}
         <div className="p-6">
-          {metricType === 'highestRiskArea' ? (
-            <>
+           
+
+
+           
               {/* Top Police Stations Ranking */}
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -224,80 +226,7 @@ const MetricDetailsModal = ({ isOpen, onClose, metricType, data }) => {
                   </div>
                 </div>
               </div>
-
-              {/* Additional Insights */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <h3 className="font-semibold text-blue-900 mb-2 flex items-center">
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  Strategic Insights
-                </h3>
-                <ul className="text-sm text-blue-800 space-y-2">
-                  <li>• <strong>Resource Allocation:</strong> Deploy additional patrol units to top 3 stations</li>
-                  <li>• <strong>Community Engagement:</strong> Launch awareness programs in high-risk areas</li>
-                  <li>• <strong>Infrastructure:</strong> Install CCTV cameras and better lighting in hotspots</li>
-                  <li>• <strong>Data Analysis:</strong> Investigate common patterns in top station areas</li>
-                  <li>• <strong>Prevention:</strong> Coordinate with local businesses for secure parking</li>
-                </ul>
-              </div>
-            </>
-          ) : (
-            /* Original layout for other metric types */
-            <>
-              {/* Data Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                {details.data.map((item, index) => (
-                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600 mb-1">{item.label}</p>
-                    <p className="text-lg font-semibold text-gray-900">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Additional Insights */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="font-semibold text-blue-900 mb-2 flex items-center">
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  Insights & Recommendations
-                </h3>
-                <ul className="text-sm text-blue-800 space-y-1">
-                  {metricType === 'totalThefts' && (
-                    <>
-                      <li>• Consider increasing patrols in high-density areas</li>
-                      <li>• Review security camera coverage in theft hotspots</li>
-                      <li>• Launch public awareness campaigns</li>
-                    </>
-                  )}
-                  {metricType === 'mostStolenModel' && (
-                    <>
-                      <li>• Target security awareness for owners of this model</li>
-                      <li>• Work with manufacturers on anti-theft features</li>
-                      <li>• Track recovery patterns for this specific model</li>
-                    </>
-                  )}
-                  {metricType === 'peakTheftTime' && (
-                    <>
-                      <li>• Adjust patrol schedules to cover peak hours</li>
-                      <li>• Implement time-based security measures</li>
-                      <li>• Educate public about securing bikes during these times</li>
-                    </>
-                  )}
-                </ul>
-              </div>
-
-              {/* Historical Context */}
-              <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-                <h4 className="font-medium text-gray-700 mb-2 flex items-center">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Historical Context
-                </h4>
-                <p className="text-sm text-gray-600">
-                  {metricType === 'totalThefts' && 'Tracking overall theft trends helps allocate resources effectively and measure intervention success.'}
-                  {metricType === 'mostStolenModel' && 'Understanding model-specific theft patterns informs manufacturer partnerships and owner education.'}
-                  {metricType === 'peakTheftTime' && 'Time pattern analysis supports optimized resource deployment and preventive measure timing.'}
-                </p>
-              </div>
-            </>
-          )}
+                
         </div>
 
         {/* Footer */}
