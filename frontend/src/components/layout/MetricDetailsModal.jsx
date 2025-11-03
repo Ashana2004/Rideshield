@@ -1,7 +1,24 @@
-import React from 'react';
-import { X, BarChart3, MapPin, Bike, Clock, TrendingUp, Calendar, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, BarChart3, MapPin, Bike, Clock, TrendingUp, Calendar, Users, Award, TrendingDown } from 'lucide-react';
 
 const MetricDetailsModal = ({ isOpen, onClose, metricType, data }) => {
+  const [topStations, setTopStations] = useState([]);
+
+  useEffect(() => {
+    if (metricType === 'highestRiskArea' && isOpen) {
+      // Fetch top police stations data
+      fetch("http://127.0.0.1:8000/api/thefts-by-ps")
+        .then(res => res.json())
+        .then(response => {
+          const sortedStations = response.data
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 5);  
+          setTopStations(sortedStations);
+        })
+        .catch(err => console.error("Error fetching top stations:", err));
+    }
+  }, [metricType, isOpen]);
+
   if (!isOpen) return null;
 
   const getMetricDetails = () => {
@@ -17,7 +34,7 @@ const MetricDetailsModal = ({ isOpen, onClose, metricType, data }) => {
             { label: 'Resolved Cases', value: data.resolved || 'N/A' },
             { label: 'Under Investigation', value: data.investigation || 'N/A' }
           ]
-        };
+        };   
       
       case 'highestRiskArea':
         return {
@@ -71,11 +88,29 @@ const MetricDetailsModal = ({ isOpen, onClose, metricType, data }) => {
   const details = getMetricDetails();
   const Icon = details.icon;
 
+  const getRankColor = (rank) => {
+    switch (rank) {
+      case 1: return 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white';
+      case 2: return 'bg-gradient-to-r from-gray-400 to-gray-500 text-white';
+      case 3: return 'bg-gradient-to-r from-orange-400 to-orange-500 text-white';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getRankIcon = (rank) => {
+    switch (rank) {
+      case 1: return <Award className="w-5 h-5" />;
+      case 2: return <TrendingUp className="w-5 h-5" />;
+      case 3: return <TrendingDown className="w-5 h-5" />;
+      default: return <span className="text-sm font-bold">{rank}</span>;
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
           <div className="flex items-center space-x-3">
             <Icon className="w-6 h-6 text-blue-600" />
             <div>
@@ -93,67 +128,105 @@ const MetricDetailsModal = ({ isOpen, onClose, metricType, data }) => {
 
         {/* Content */}
         <div className="p-6">
-          {/* Data Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            {details.data.map((item, index) => (
-              <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600 mb-1">{item.label}</p>
-                <p className="text-lg font-semibold text-gray-900">{item.value}</p>
+           
+
+
+           
+              {/* Top Police Stations Ranking */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <Award className="w-5 h-5 mr-2 text-yellow-500" />
+                  Top 5 Police Stations by Theft Incidents
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                  {topStations.map((station, index) => (
+                    <div 
+                      key={station.locality} 
+                      className={`p-4 rounded-lg border-2 shadow-sm transition-all duration-200 hover:shadow-md ${
+                        index === 0 ? 'border-yellow-400' : 
+                        index === 1 ? 'border-gray-400' : 
+                        index === 2 ? 'border-orange-400' : 'border-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getRankColor(index + 1)}`}>
+                          {getRankIcon(index + 1)}
+                        </div>
+                        <span className={`text-sm font-semibold ${
+                          index === 0 ? 'text-yellow-600' : 
+                          index === 1 ? 'text-gray-600' : 
+                          index === 2 ? 'text-orange-600' : 'text-gray-500'
+                        }`}>
+                          {index === 0 ? '1st' : index === 1 ? '2nd' : index === 2 ? '3rd' : `${index + 1}th`}
+                        </span>
+                      </div>
+                      
+                      <h4 className="font-bold text-gray-900 text-lg mb-1 truncate">
+                        {station.locality}
+                      </h4>
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-bold text-gray-800">
+                          {station.count}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          incidents
+                        </span>
+                      </div>
+                      
+                      {/* Progress bar showing relative percentage */}
+                      {topStations.length > 0 && (
+                        <div className="mt-3">
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                              style={{ 
+                                width: `${(station.count / topStations[0].count) * 100}%` 
+                              }}
+                            ></div>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1 text-right">
+                            {Math.round((station.count / topStations[0].count) * 100)}% of highest
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Summary Statistics */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <p className="text-sm text-blue-600 mb-1">Total Stations</p>
+                    <p className="text-xl font-bold text-blue-800">{topStations.length}</p>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <p className="text-sm text-green-600 mb-1">Total Incidents</p>
+                    <p className="text-xl font-bold text-green-800">
+                      {topStations.reduce((sum, station) => sum + station.count, 0)}
+                    </p>
+                  </div>
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <p className="text-sm text-purple-600 mb-1">Average per Station</p>
+                    <p className="text-xl font-bold text-purple-800">
+                      {topStations.length > 0 
+                        ? Math.round(topStations.reduce((sum, station) => sum + station.count, 0) / topStations.length)
+                        : 0
+                      }
+                    </p>
+                  </div>
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <p className="text-sm text-orange-600 mb-1">Top Station Share</p>
+                    <p className="text-xl font-bold text-orange-800">
+                      {topStations.length > 0 
+                        ? `${Math.round((topStations[0].count / topStations.reduce((sum, station) => sum + station.count, 0)) * 100)}%`
+                        : '0%'
+                      }
+                    </p>
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
-
-          {/* Additional Insights */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="font-semibold text-blue-900 mb-2 flex items-center">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Insights & Recommendations
-            </h3>
-            <ul className="text-sm text-blue-800 space-y-1">
-              {metricType === 'totalThefts' && (
-                <>
-                  <li>• Consider increasing patrols in high-density areas</li>
-                  <li>• Review security camera coverage in theft hotspots</li>
-                  <li>• Launch public awareness campaigns</li>
-                </>
-              )}
-              {metricType === 'highestRiskArea' && (
-                <>
-                  <li>• Deploy additional resources to this police station</li>
-                  <li>• Analyze common factors in this area's thefts</li>
-                  <li>• Coordinate with local community watch programs</li>
-                </>
-              )}
-              {metricType === 'mostStolenModel' && (
-                <>
-                  <li>• Target security awareness for owners of this model</li>
-                  <li>• Work with manufacturers on anti-theft features</li>
-                  <li>• Track recovery patterns for this specific model</li>
-                </>
-              )}
-              {metricType === 'peakTheftTime' && (
-                <>
-                  <li>• Adjust patrol schedules to cover peak hours</li>
-                  <li>• Implement time-based security measures</li>
-                  <li>• Educate public about securing bikes during these times</li>
-                </>
-              )}
-            </ul>
-          </div>
-
-          {/* Historical Context */}
-          <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-            <h4 className="font-medium text-gray-700 mb-2 flex items-center">
-              <Calendar className="w-4 h-4 mr-2" />
-              Historical Context
-            </h4>
-            <p className="text-sm text-gray-600">
-              {metricType === 'totalThefts' && 'Tracking overall theft trends helps allocate resources effectively and measure intervention success.'}
-              {metricType === 'highestRiskArea' && 'Identifying high-risk areas enables targeted policing and community engagement strategies.'}
-              {metricType === 'mostStolenModel' && 'Understanding model-specific theft patterns informs manufacturer partnerships and owner education.'}
-              {metricType === 'peakTheftTime' && 'Time pattern analysis supports optimized resource deployment and preventive measure timing.'}
-            </p>
-          </div>
+                
         </div>
 
         {/* Footer */}

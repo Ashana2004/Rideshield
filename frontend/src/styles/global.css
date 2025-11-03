@@ -29,3 +29,33 @@ body {
 .max-h-40::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
+
+/* Ensure Leaflet map stays below modals/dialogs */
+.leaflet-container {
+  z-index: 0 !important;
+}
+
+/* Make sure map panes don't overlap modals */
+.leaflet-tile-pane,
+.leaflet-overlay-pane,
+.leaflet-shadow-pane,
+.leaflet-marker-pane,
+.leaflet-popup-pane,
+.leaflet-tooltip-pane {
+  z-index: 0 !important;
+}
+
+/* Give modal/dialog/backdrop a very high z-index so they always appear above the map.
+   Add these classes to your modal component if it doesn't already use them:
+   - modal-root or modal-overlay for the backdrop
+   - modal or modal-dialog for the content
+*/
+.modal-root,
+.modal-overlay,
+.modal,
+[role="dialog"],
+.react-modal,
+.dialog-overlay,
+.dialog-content {
+  z-index: 99999 !important;
+}

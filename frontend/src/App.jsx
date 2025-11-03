@@ -13,6 +13,21 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isTheftModalOpen, setIsTheftModalOpen] = useState(false);
 
+  // Lifted filters state to App so Sidebar + Dashboard share it
+  const [filters, setFilters] = useState({
+    dateFrom: "",
+    dateTo: "",
+    timeFrom: "",
+    timeTo: "",
+    localities: [],
+    places: [],
+    company: "",
+    categories: [],
+    timeOfDay: "All",
+    days: [],
+    spotTypes: []
+  });
+  
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -40,24 +55,32 @@ function App() {
       />
       
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
+        {/* Sidebar controlled here */}
         {isSidebarOpen && (
-          <div className="w-72 flex-shrink-0 bg-white border-r border-gray-200 overflow-y-auto">
-            <Sidebar />
-          </div>
+          <Sidebar filters={filters} setFilters={setFilters} />
         )}
-        
+
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
           <Routes>
             <Route path="/" element={
               <div className="p-4 sm:p-6 lg:p-8">
-                <Dashboard />
+                <Dashboard
+                  isSidebarOpen={isSidebarOpen}
+                  toggleSidebar={toggleSidebar}
+                  filters={filters}
+                  setFilters={setFilters}
+                />
               </div>
             } />
             <Route path="/dashboard" element={
               <div className="p-4 sm:p-6 lg:p-8">
-                <Dashboard />
+                <Dashboard
+                  isSidebarOpen={isSidebarOpen}
+                  toggleSidebar={toggleSidebar}
+                  filters={filters}
+                  setFilters={setFilters}
+                />
               </div>
             } />
             <Route path="/reports" element={<Reports />} />

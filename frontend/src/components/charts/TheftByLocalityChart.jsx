@@ -3,15 +3,45 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 
-const TheftByLocalityChart = () => {
+const TheftByLocalityChart = ({ filters }) => {
   const [theftsByLocalityData, setTheftsByLocality] = useState([]);
 
+  const buildQueryString = () => {
+    const params = new URLSearchParams();
+    
+    if (filters.localities && filters.localities.length > 0) {
+      params.append('localities', filters.localities.join(','));
+    }
+    if (filters.places && filters.places.length > 0) {
+      params.append('places', filters.places.join(','));
+    }
+    if (filters.company) {
+      params.append('company', filters.company);
+    }
+    if (filters.categories && filters.categories.length > 0) {
+      params.append('categories', filters.categories.join(','));
+    }
+    if (filters.timeOfDay && filters.timeOfDay !== "All") {
+      params.append('time_of_day', filters.timeOfDay);
+    }
+    if (filters.days && filters.days.length > 0) {
+      params.append('days', filters.days.join(','));
+    }
+    if (filters.spotTypes && filters.spotTypes.length > 0) {
+      params.append('spot_types', filters.spotTypes.join(','));
+    }
+    
+    return params.toString();
+  };
+
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/thefts-by-ps")
+    const queryString = buildQueryString();
+    
+    fetch(`http://127.0.0.1:8000/api/thefts-by-ps?${queryString}`)
       .then(res => res.json())
       .then(data => setTheftsByLocality(data.data))
       .catch(err => console.error(err));
-  }, []);
+  }, [filters]); // Re-fetch when filters change
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
