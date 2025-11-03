@@ -5,6 +5,7 @@ import Sidebar from './components/layout/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import NewReport from "./pages/newreport";
 import TheftEntryModal from './components/theft/TheftEntryModal';
 import './index.css';
 
@@ -84,6 +85,7 @@ function App() {
             } />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/newreport" element={<NewReport />} /> {/* ✅ fixed */}
           </Routes>
         </main>
       </div>

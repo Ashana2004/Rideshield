@@ -19,3 +19,6 @@ app.include_router(theft_router, prefix="/api")
 @app.get("/")
 def root():
     return {"message": "Backend running!"}
+@app.post("/generate_report")
+def generate_report():
+    return {"status": "success", "report": "Generated successfully!"}
