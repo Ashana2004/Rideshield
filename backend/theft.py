@@ -219,7 +219,7 @@ def get_thefts_by_locality(
 
 def safe_number(value):
     """Convert None, NaN, inf, or invalid numbers to 0."""
-    try:
+    try:     
         if value is None:
             return 0
         if isinstance(value, (float, int)):
