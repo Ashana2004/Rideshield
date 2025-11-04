@@ -24,16 +24,15 @@ const MetricDetailsModal = ({ isOpen, onClose, metricType, data }) => {
         break;
 
       case 'mostStolenModel':
-        fetch("http://127.0.0.1:8000/api/thefts-company")
-          .then(res => res.json())
-          .then(response => {
-            const sortedModels = response.data
-              ?.sort((a, b) => b.count - a.count)
-              .slice(0, 5) || [];
-            setTopModels(sortedModels);
-          })
-          .catch(err => console.error("Error fetching top models:", err));
-        break;
+      fetch("http://127.0.0.1:8000/api/most-model")
+        .then(res => res.json())
+        .then(response => {
+          if (!response.data) return;
+          setTopModels(response.data.slice(0, 5));
+        })
+        .catch(err => console.error("Error fetching top models:", err));
+      break;
+
 
       case 'peakTheftTime':
         fetch("http://127.0.0.1:8000/api/Time_slot-by-company")

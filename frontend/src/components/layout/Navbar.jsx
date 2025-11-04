@@ -104,6 +104,15 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, onTheftEntryClick }) => {
             <Plus className="w-4 h-4 sm:hidden" />
           </button>
 
+          {/* Generate Report Button (restored) */}
+          <button
+            onClick={() => handleNavClick('/newreport')}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            <BarChart3 className="w-4 h-4" />
+            <span className="text-sm font-medium hidden sm:block">Generate Report</span>
+          </button>
+
           {/* Sidebar Toggle for Desktop */}
           <button
             onClick={toggleSidebar}

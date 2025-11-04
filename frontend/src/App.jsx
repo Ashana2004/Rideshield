@@ -45,7 +45,7 @@ function App() {
     setIsTheftModalOpen(false);
     alert('Theft report submitted successfully!');
   };
-
+ 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       <Navbar 
@@ -62,9 +62,9 @@ function App() {
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
-          <Routes>
+          <Routes> 
             <Route path="/" element={
-              <div className="p-4 sm:p-6 lg:p-8">
+              <div className="p-6 sm:p-2 lg:p-6">
                 <Dashboard
                   isSidebarOpen={isSidebarOpen}
                   toggleSidebar={toggleSidebar}
@@ -81,7 +81,7 @@ function App() {
                   filters={filters}
                   setFilters={setFilters}
                 />
-              </div>
+              </div> 
             } />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />

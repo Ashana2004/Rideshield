@@ -101,14 +101,17 @@ export default function Dashboard({   filters: parentFilters, setFilters }) {
     fetch(`http://127.0.0.1:8000/api/most-model?${queryString}`)
       .then(res => res.json())
       .then(data => {
-        setMostStolenModel(`${data.most_model} (${data.count})`);
+        const topModel = data.data?.[0] || { model: "N/A", count: 0 };
+
+        setMostStolenModel(`${topModel.model} (${topModel.count})`);
+
         setMetricData(prev => ({
           ...prev,
-          mostStolenModel: { model: data.most_model, count: data.count }
+          mostStolenModel: { model: topModel.model, count: topModel.count }
         }));
       })
       .catch(err => console.error('Error fetching most stolen model:', err));
-
+  
     // Fetch peak theft time
     fetch(`http://127.0.0.1:8000/api/peak-time?${queryString}`)
       .then(res => res.json())
@@ -134,10 +137,9 @@ export default function Dashboard({   filters: parentFilters, setFilters }) {
 
   return (
     <div className="flex bg-gray-100 min-h-screen font-sans text-gray-800">
-        
-      {/* Main Content */}
+     
       <div className="flex-1">
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main  >
           <Header />
 
           <div>
@@ -146,7 +148,7 @@ export default function Dashboard({   filters: parentFilters, setFilters }) {
             </h2>
             <p className="text-sm text-gray-500 mb-6">
               Comprehensive analysis and visualization of bike theft patterns across Kolhapur city
-            </p>
+            </p> 
 
             <MetricCards
               totalThefts={totalThefts}
@@ -163,7 +165,6 @@ export default function Dashboard({   filters: parentFilters, setFilters }) {
 
               <div>
                 <TheftByCompanyChart filters={filters} />
-                console.log("Chart data:", someDataVariable);
               </div>
 
               <div className="lg:col-span-2">
@@ -175,7 +176,7 @@ export default function Dashboard({   filters: parentFilters, setFilters }) {
               </div>
             </div>
           </div>
-
+ 
           {/* Metric Details Modal */}
           <MetricDetailsModal
             isOpen={isModalOpen}

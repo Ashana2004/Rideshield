@@ -14,8 +14,6 @@ router = APIRouter()
 def build_filter_query(
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
-    time_from: Optional[str] = None,
-    time_to: Optional[str] = None,
     localities: Optional[List[str]] = None,
     places: Optional[List[str]] = None,
     company: Optional[str] = None,
@@ -56,13 +54,6 @@ def build_filter_query(
         query["SPOT"] = {"$in": spot_types}
     
     return query
-
-from datetime import datetime
-from fastapi import Query
-import traceback
-from datetime import datetime, timedelta
-import pandas as pd
-from fastapi import HTTPException
 
 @router.get("/total-thefts")
 def get_total_thefts(
@@ -148,12 +139,12 @@ def get_most_model(
         {"$match": query},
         {"$group": {"_id": "$MAKE", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}},
-        {"$limit": 1}
+        {"$limit": 5}
     ]
     
-    result = thefts_collection.aggregate(pipeline)
-    model = list(result)[0] if result else {"_id": None, "count": 0}
-    return {"most_model": model["_id"], "count": model["count"]}
+    result = list(thefts_collection.aggregate(pipeline))
+    data = [{"model": r["_id"], "count": r["count"]} for r in result]
+    return {"data": data}
 
 
 @router.get("/peak-time")
@@ -424,7 +415,7 @@ def thefts_heatmap(
     
     return HTMLResponse(content=m.get_root().render())
 
-# ✅ FIXED & UPDATED ENDPOINT BELOW
+ 
 @router.post("/generate-report")
 def generate_report(
     police_station: str = Query(None),
@@ -442,7 +433,7 @@ def generate_report(
 
         df = pd.DataFrame(data)
 
-        # Convert your date format safely (e.g. '27.7.25')
+        
         def parse_custom_date(date_str):
             for fmt in ("%d.%m.%y", "%d.%m.%Y"):
                 try:
@@ -461,24 +452,24 @@ def generate_report(
         if df.empty:
             return {"message": "No data found for the given date range."}
 
-        # ----------------- REPORT METRICS -----------------
+      
         total_thefts = len(df)
         most_targeted_station = df["POLICE_STATION"].value_counts().idxmax()
         most_common_time = df["Time_of_day"].value_counts().idxmax()
         most_stolen_model = df["MAKE"].value_counts().idxmax()
         highest_theft_day = df["DATE"].value_counts().idxmax().strftime("%Y-%m-%d")
 
-        # ----------------- ADDITIONAL METRICS -----------------
-        # Calculate Average per Day
+        
+         
         num_days = (end_dt - start_dt).days + 1
         avg_per_day = round(total_thefts / num_days, 2) if num_days > 0 else 0
 
-        # ----------------- REPORT HEADER DATA -----------------
+        
         report_title = "Bike Theft Analysis Report"
         date_range = f"{start_date} to {end_date}"
         generated_on = datetime.now().strftime("%Y-%m-%d")
 
-        # ----------------- SUMMARY TEXT -----------------
+       
         summary_text = (
             f"Between {start_date} and {end_date}, there were {total_thefts} bike thefts. "
             f"The most targeted police station was {most_targeted_station}, "
@@ -487,7 +478,7 @@ def generate_report(
             f"The busiest day was {highest_theft_day}."
         )
 
-        # ----------------- FINAL RESPONSE -----------------
+ 
         return JSONResponse(content={
             "Report_Title": report_title,
             "Date_Range": date_range,
