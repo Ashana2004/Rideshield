@@ -11,6 +11,14 @@ const Reports = () => {
   const [loading, setLoading] = useState(true);
   const [downloadMenuOpen, setDownloadMenuOpen] = useState(false);
 
+  // NEW: Theft report submission handler
+  const handleSubmitTheftReport = (theftData) => {
+    console.log('Theft Report Submitted:', theftData);
+    setIsTheftModalOpen(false);
+    alert('Theft report submitted successfully!');
+    // Here you would typically make an API call to submit the report
+  };
+
   // Mock data - replace with actual API calls
   useEffect(() => {
     // Simulate API call

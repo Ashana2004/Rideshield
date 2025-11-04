@@ -10,8 +10,8 @@ import {
   LogOut,
   ChevronDown,
   Filter,
-  Plus,
-  AlertTriangle
+  AlertTriangle,
+  Plus
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -43,7 +43,7 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, onTheftEntryClick }) => {
           >
             {isSidebarOpen ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
           </button>
-          <Link to="/newreport" className="px-3 py-2 hover:bg-gray-100 rounded">New Report</Link>
+
           <Link to="/" className="flex items-center space-x-3">
             <Shield className="w-8 h-8 text-blue-600" />
             <div>
@@ -66,7 +66,7 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, onTheftEntryClick }) => {
             <BarChart3 className="w-4 h-4" />
             <span className="font-medium">Dashboard</span>
           </button>
-          
+
           <button
             onClick={() => handleNavClick('/reports')}
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
@@ -78,7 +78,7 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, onTheftEntryClick }) => {
             <Shield className="w-4 h-4" />
             <span className="font-medium">Reports</span>
           </button>
-          
+
           <button
             onClick={() => handleNavClick('/settings')}
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
@@ -92,7 +92,7 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, onTheftEntryClick }) => {
           </button>
         </div>
 
-        {/* Right Section - User Menu and Notifications */}
+        {/* Right Section - Report, Sidebar, Notifications, Profile */}
         <div className="flex items-center space-x-3">
           {/* Theft Entry Button */}
           <button
@@ -183,7 +183,7 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, onTheftEntryClick }) => {
           <BarChart3 className="w-5 h-5" />
           <span className="text-xs font-medium">Dashboard</span>
         </button>
-        
+
         <button
           onClick={() => handleNavClick('/reports')}
           className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-lg transition-colors ${
@@ -193,7 +193,7 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, onTheftEntryClick }) => {
           <Shield className="w-5 h-5" />
           <span className="text-xs font-medium">Reports</span>
         </button>
-        
+
         <button
           onClick={() => handleNavClick('/settings')}
           className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-lg transition-colors ${
