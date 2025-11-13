@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 from collections import Counter
 from mongodb import thefts_collection 
 import folium
@@ -8,6 +8,8 @@ from typing import Optional, List
 from datetime import datetime
 import math
 from fastapi.responses import JSONResponse
+import pandas as pd
+import traceback
 
 router = APIRouter()
 
@@ -147,6 +149,25 @@ def get_most_model(
     return {"data": data}
 
 
+def safe_number(value):
+    """Convert None, NaN, inf, or invalid numbers to 0."""
+    try:
+        if value is None:
+            return 0.0
+        # handle floats safely with isnan/isinf
+        if isinstance(value, float):
+            if math.isnan(value) or math.isinf(value):
+                return 0.0
+            return float(value)
+        # ints are safe to convert
+        if isinstance(value, int):
+            return float(value)
+        # try to coerce other types
+        return float(value)
+    except Exception:
+        return 0.0
+
+
 @router.get("/peak-time")
 def get_time(
     localities: Optional[str] = Query(None),
@@ -174,10 +195,11 @@ def get_time(
         {"$limit": 1}
     ]
     
-    result = thefts_collection.aggregate(pipeline)
-    slot = list(result)[0] if result else {"_id": None, "count": 0}
-    
-    return {"time_slot": slot["_id"], "time": slot["count"]}
+    result = list(thefts_collection.aggregate(pipeline))
+    if result:
+        slot = result[0]
+        return {"time_slot": slot.get("_id"), "time": slot.get("count", 0)}
+    return {"time_slot": None, "time": 0}
 
 
 @router.get("/thefts-by-ps")
@@ -199,7 +221,6 @@ def get_thefts_by_locality(
         days=days.split(",") if days else None,
         spot_types=spot_types.split(",") if spot_types else None
     )
-    
     pipeline = [
         {"$match": query},
         {"$group": {
@@ -208,37 +229,10 @@ def get_thefts_by_locality(
         }},
         {"$sort": {"count": -1}}
     ]
-    
+ 
     result = thefts_collection.aggregate(pipeline)
     data = [{"locality": r["_id"], "count": r["count"]} for r in result]
     return {"data": data}
-
-# @router.get("/theft-trends")
-# def get_theft_trends():
-#     result = thefts_collection.aggregate([
-        
-#         {"$group": {
-#             "_id": {"$DATE": {"format": "%Y-%m-%d", "date": "$datetime"}},
-#             "count": {"$sum": 1}
-#         }},
-#         {"$sort": {"_id": 1}}  
-#     ])
-#     trends = [{"date": r["_id"], "count": r["count"]} for r in result]
-#     return {"data": trends}
- 
- 
-def safe_number(value):
-    """Convert None, NaN, inf, or invalid numbers to 0."""
-    try:     
-        if value is None:
-            return 0
-        if isinstance(value, (float, int)):
-            if math.isnan(value) or math.isinf(value):
-                return 0
-            return float(value)
-        return float(value)
-    except Exception:
-        return 0
 
 
 @router.get("/Time_slot-by-company")
@@ -274,20 +268,20 @@ def time_slot_by_company(
     
     data = {}
     for r in result:
-        company = r["_id"].get("company", "Unknown")
+        company_name = r["_id"].get("company", "Unknown")
         period = r["_id"].get("Time_slot", "Unknown")
         count = safe_number(r.get("count", 0))
         
-        if company not in data:
-            data[company] = {
+        if company_name not in data:
+            data[company_name] = {
                 "Morning": 0,
                 "Afternoon": 0,
                 "Evening": 0,
                 "Midnight": 0
             }
         
-        if period in data[company]:
-            data[company][period] = count
+        if period in data[company_name]:
+            data[company_name][period] = count
     
     output = []
     for k, v in data.items():
@@ -418,9 +412,9 @@ def thefts_heatmap(
  
 @router.post("/generate-report")
 def generate_report(
-    police_station: str = Query(None),
-    start_date: str = Query(None),
-    end_date: str = Query(None)
+    police_station: Optional[str] = Query(None),
+    start_date: Optional[str] = Query(None),
+    end_date: Optional[str] = Query(None)
 ):
     try:
         query = {}
@@ -429,56 +423,85 @@ def generate_report(
 
         data = list(thefts_collection.find(query, {"_id": 0}))
         if not data:
-            return {"message": "No data found in DB."}
+            return JSONResponse(content={"message": "No data found in DB."}, status_code=404)
 
         df = pd.DataFrame(data)
 
-        
-        def parse_custom_date(date_str):
-            for fmt in ("%d.%m.%y", "%d.%m.%Y"):
-                try:
-                    return datetime.strptime(date_str, fmt)
-                except Exception:
-                    continue
-            return pd.NaT
+        # Parse DATE column safely into a new column DATE_PARSED
+        if "DATE" in df.columns:
+            df["DATE_PARSED"] = pd.to_datetime(df["DATE"].astype(str), errors="coerce", infer_datetime_format=True)
+        elif "Date" in df.columns:
+            df["DATE_PARSED"] = pd.to_datetime(df["Date"].astype(str), errors="coerce", infer_datetime_format=True)
+        else:
+            df["DATE_PARSED"] = pd.to_datetime(pd.Series([pd.NaT] * len(df)))
 
-        df["DATE"] = df["DATE"].astype(str).apply(parse_custom_date)
+        # Determine start/end timestamps
+        start_dt = pd.to_datetime(start_date, errors="coerce") if start_date else df["DATE_PARSED"].min()
+        end_dt = pd.to_datetime(end_date, errors="coerce") if end_date else df["DATE_PARSED"].max()
 
-        if start_date and end_date:
-            start_dt = pd.to_datetime(start_date)
-            end_dt = pd.to_datetime(end_date)
-            df = df[(df["DATE"] >= start_dt) & (df["DATE"] <= end_dt)]
+        if pd.isna(start_dt) or pd.isna(end_dt):
+            return JSONResponse(
+                content={"message": "Invalid or missing date range; provide valid start_date and end_date (YYYY-MM-DD) or ensure DATE column exists in DB."},
+                status_code=400
+            )
+
+        if start_dt > end_dt:
+            start_dt, end_dt = end_dt, start_dt
+
+        # Filter by parsed dates
+        df = df[(df["DATE_PARSED"] >= start_dt) & (df["DATE_PARSED"] <= end_dt)]
 
         if df.empty:
-            return {"message": "No data found for the given date range."}
+            return JSONResponse(content={"message": "No data found for the given date range."}, status_code=404)
 
-      
-        total_thefts = len(df)
-        most_targeted_station = df["POLICE_STATION"].value_counts().idxmax()
-        most_common_time = df["Time_of_day"].value_counts().idxmax()
-        most_stolen_model = df["MAKE"].value_counts().idxmax()
-        highest_theft_day = df["DATE"].value_counts().idxmax().strftime("%Y-%m-%d")
+        # Total thefts
+        total_thefts = int(len(df))
 
-        
-         
-        num_days = (end_dt - start_dt).days + 1
+        # Most targeted police station (safe)
+        if "POLICE_STATION" in df.columns:
+            station_series = df["POLICE_STATION"].fillna("Unknown").astype(str)
+            most_targeted_station = station_series.value_counts().idxmax() if not station_series.value_counts().empty else "Unknown"
+        else:
+            most_targeted_station = "Unknown"
+
+        # Most common time slot (safe)
+        if "Time_of_day" in df.columns:
+            time_series = df["Time_of_day"].dropna().astype(str)
+        elif "Time_of_Day" in df.columns:
+            time_series = df["Time_of_Day"].dropna().astype(str)
+        else:
+            time_series = pd.Series(dtype=object)
+        most_common_time = time_series.value_counts().idxmax() if not time_series.empty else "Unknown"
+
+        # Most stolen model (safe)
+        if "MAKE" in df.columns:
+            make_series = df["MAKE"].dropna().astype(str)
+        elif "Make" in df.columns:
+            make_series = df["Make"].dropna().astype(str)
+        else:
+            make_series = pd.Series(dtype=object)
+        most_stolen_model = make_series.value_counts().idxmax() if not make_series.empty else "Unknown"
+
+        # Busiest day
+        date_notna = df["DATE_PARSED"].dropna()
+        highest_theft_day = date_notna.dt.strftime("%Y-%m-%d").value_counts().idxmax() if not date_notna.empty else "Unknown"
+
+        # Average per day
+        num_days = int((end_dt.normalize() - start_dt.normalize()).days) + 1
         avg_per_day = round(total_thefts / num_days, 2) if num_days > 0 else 0
 
-        
         report_title = "Bike Theft Analysis Report"
-        date_range = f"{start_date} to {end_date}"
+        date_range = f"{start_dt.strftime('%Y-%m-%d')} to {end_dt.strftime('%Y-%m-%d')}"
         generated_on = datetime.now().strftime("%Y-%m-%d")
 
-       
         summary_text = (
-            f"Between {start_date} and {end_date}, there were {total_thefts} bike thefts. "
+            f"Between {start_dt.strftime('%Y-%m-%d')} and {end_dt.strftime('%Y-%m-%d')}, there were {total_thefts} bike thefts. "
             f"The most targeted police station was {most_targeted_station}, "
-            f"with most thefts during {most_common_time.lower()} hours. "
+            f"with most thefts during {most_common_time} hours. "
             f"The most stolen model was {most_stolen_model}. "
             f"The busiest day was {highest_theft_day}."
         )
 
- 
         return JSONResponse(content={
             "Report_Title": report_title,
             "Date_Range": date_range,
