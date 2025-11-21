@@ -10,6 +10,10 @@ import math
 from fastapi.responses import JSONResponse
 import pandas as pd
 import traceback
+from fpdf import FPDF
+from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
+import io
 
 router = APIRouter()
 
@@ -24,34 +28,29 @@ def build_filter_query(
     days: Optional[List[str]] = None,
     spot_types: Optional[List[str]] = None
 ):
-    """Build MongoDB query from filters"""
+   
     query = {}
-    
-    # Police Station filter
+  
     if localities and len(localities) > 0:
         query["POLICE_STATION"] = {"$in": localities}
-    
-    # Places filter
+     
     if places and len(places) > 0:
         query["PLACE"] = {"$in": places}
-    
-    # Company/Make filter
+      
     if company:
         query["Make"] = company
-    
-    # Category filter
+     
     if categories and len(categories) > 0:
         query["Category"] = {"$in": categories}
-    
-    # Time of day filter
+     
     if time_of_day and time_of_day != "All":
         query["Time_of_day"] = time_of_day
     
-    # Days filter
+     
     if days and len(days) > 0:
         query["DAY"] = {"$in": days}
     
-    # Spot types filter
+    
     if spot_types and len(spot_types) > 0:
         query["SPOT"] = {"$in": spot_types}
     
@@ -361,7 +360,9 @@ def theft_data(
             "DAY": 1,
             "LATITUDE": 1,
             "LONGITUDE": 1,
-            "DATE": 1
+            "DATE": 1,
+            "STATUS": 1,
+            "CaseNo": 1,
         }
  ))
     
@@ -519,6 +520,39 @@ def generate_report(
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
+from fastapi import Body
+from fastapi.responses import FileResponse
+from fpdf import FPDF
+
+@router.post("/download/pdf")
+def download_pdf(filtered_reports: list = Body(...)):
+    file_path = "filtered_reports.pdf"
+
+    pdf = FPDF()
+    pdf.add_page()
+
+    pdf.set_font("Arial", style="B", size=16)
+    pdf.cell(200, 10, txt="Filtered Bike Theft Reports", ln=True)
+    pdf.ln(5)
+
+    pdf.set_font("Arial", size=12)
+
+    for report in filtered_reports:
+        pdf.cell(200, 10, txt=f"Case No: {report['CaseNo']}", ln=True)
+        pdf.cell(200, 10, txt=f"Make: {report['Make']}", ln=True)
+        pdf.cell(200, 10, txt=f"MAKE: {report['MAKE']}", ln=True)
+        pdf.cell(200, 10, txt=f"Police Station: {report['POLICE_STATION']}", ln=True)
+        pdf.cell(200, 10, txt=f"Date: {report['DATE']}", ln=True)
+        pdf.cell(200, 10, txt=f"Status: {report['STATUS']}", ln=True)
+        pdf.ln(5)
+
+    pdf.output(file_path)
+
+    return FileResponse(
+        file_path,
+        media_type="application/pdf",
+        filename="filtered_reports.pdf"
+    )
 
 
 

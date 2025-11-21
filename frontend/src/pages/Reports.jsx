@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Filter, Search, FileText, Calendar, BarChart3, FileDown, ChevronDown } from 'lucide-react';
+import { Download, Filter, Search, FileText,  BarChart3, FileDown, ChevronDown } from 'lucide-react';
 
 const Reports = () => {
   const [reports, setReports] = useState([]);
@@ -11,146 +11,77 @@ const Reports = () => {
   const [loading, setLoading] = useState(true);
   const [downloadMenuOpen, setDownloadMenuOpen] = useState(false);
 
-  // NEW: Theft report submission handler
+ 
   const handleSubmitTheftReport = (theftData) => {
     console.log('Theft Report Submitted:', theftData);
     setIsTheftModalOpen(false);
     alert('Theft report submitted successfully!');
-    // Here you would typically make an API call to submit the report
+     
   };
 
-  // Mock data - replace with actual API calls
+   
   useEffect(() => {
     // Simulate API call
     setTimeout(() => {
-      const mockReports = [
-        {
-          id: 1,
-          reportId: 'RPT-001',
-          bikeModel: 'Honda Activa',
-          licensePlate: 'MH09AB1234',
-          color: 'Black',
-          location: 'Shahupuri',
-          theftDate: '2024-01-15',
-          theftTime: '14:30',
-          status: 'Under Investigation',
-          submittedDate: '2024-01-15',
-          officer: 'Officer Patil',
-          contactNumber: '9876543210',
-          description: 'Stolen from parking lot'
-        },
-        {
-          id: 2,
-          reportId: 'RPT-002',
-          bikeModel: 'Bajaj Pulsar',
-          licensePlate: 'MH09CD5678',
-          color: 'Red',
-          location: 'Rajarampuri',
-          theftDate: '2024-01-14',
-          theftTime: '20:15',
-          status: 'Case Closed',
-          submittedDate: '2024-01-14',
-          officer: 'Officer Desai',
-          contactNumber: '9876543211',
-          description: 'Recovered near market area'
-        },
-        {
-          id: 3,
-          reportId: 'RPT-003',
-          bikeModel: 'TVS Jupiter',
-          licensePlate: 'MH09EF9012',
-          color: 'White',
-          location: 'Mahadwar Road',
-          theftDate: '2024-01-13',
-          theftTime: '09:45',
-          status: 'Active',
-          submittedDate: '2024-01-13',
-          officer: 'Officer Kulkarni',
-          contactNumber: '9876543212',
-          description: 'Stolen during night'
-        },
-        {
-          id: 4,
-          reportId: 'RPT-004',
-          bikeModel: 'Hero Splendor',
-          licensePlate: 'MH09GH3456',
-          color: 'Blue',
-          location: 'Shahupuri',
-          theftDate: '2024-01-12',
-          theftTime: '16:20',
-          status: 'Under Investigation',
-          submittedDate: '2024-01-12',
-          officer: 'Officer Patil',
-          contactNumber: '9876543213',
-          description: 'Stolen from residential area'
-        },
-        {
-          id: 5,
-          reportId: 'RPT-005',
-          bikeModel: 'Yamaha MT',
-          licensePlate: 'MH09IJ7890',
-          color: 'Green',
-          location: 'Rajarampuri',
-          theftDate: '2024-01-11',
-          theftTime: '22:10',
-          status: 'Case Closed',
-          submittedDate: '2024-01-11',
-          officer: 'Officer Desai',
-          contactNumber: '9876543214',
-          description: 'Vehicle recovered with damage'
-        }
-      ];
-      setReports(mockReports);
-      setFilteredReports(mockReports);
+      fetch("http://127.0.0.1:8000/api/theft-data")
+      .then(res=>res.json())
+      .then(data=>{
+         console.log(data.data);
+      setReports(data.data);
+      setFilteredReports(data.data);
       setLoading(false);
+      })
     }, 1000);
   }, []);
 
-  // Apply filters
+
   useEffect(() => {
     let filtered = reports;
 
     if (searchTerm) {
       filtered = filtered.filter(report =>
-        report.bikeModel.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.licensePlate.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.reportId.toLowerCase().includes(searchTerm.toLowerCase())
+        report.MAKE.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        report.POLICE_STATION.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        report.CaseNo.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (dateFilter) {
-      filtered = filtered.filter(report => report.theftDate === dateFilter);
+      filtered = filtered.filter(report => report.DATE === dateFilter);
     }
 
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(report => report.status === statusFilter);
+      filtered = filtered.filter(report => report.STATUS === statusFilter);
     }
 
     if (locationFilter !== 'all') {
-      filtered = filtered.filter(report => report.location === locationFilter);
+      filtered = filtered.filter(report => report.POLICE_STATION === locationFilter);
     }
 
     setFilteredReports(filtered);
   }, [searchTerm, dateFilter, statusFilter, locationFilter, reports]);
 
-  // Calculate statistics
+ 
   const totalReports = reports.length;
-  const underInvestigation = reports.filter(r => r.status === 'Under Investigation').length;
-  const casesClosed = reports.filter(r => r.status === 'Case Closed').length;
+  const underInvestigation = reports.filter(r => r.STATUS === 'Under Investigation').length;
+  const casesClosed = reports.filter(r => r.STATUS === 'Case Closed').length;
   const filteredCount = filteredReports.length;
 
   // Download functions
   const downloadPDF = async () => {
-    try {
-      // Simulate PDF download
-      alert('PDF download started! This would download filtered reports in PDF format.');
-      console.log('Downloading PDF with', filteredCount, 'reports');
-    } catch (error) {
-      console.error('Error downloading PDF:', error);
-      alert('Error downloading PDF report');
-    }
-  };
+  const response = await fetch("http://localhost:8000/api/download/pdf", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(filteredReports)
+});
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "filtered_reports.pdf";
+  a.click();
+};
 
   const downloadCSV = async () => {
     try {
@@ -186,27 +117,38 @@ const Reports = () => {
         break;
       case 'word':
         downloadWord();
-        break;
+        break;         
       default:
         break;
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
+  const getStatusColor = (STATUS) => {
+    switch (STATUS) {
       case 'Active': return 'bg-blue-100 text-blue-800';
       case 'Under Investigation': return 'bg-yellow-100 text-yellow-800';
       case 'Case Closed': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+  const parseCustomDate = (d) => {
+  if (!d) return "";
+  const parts = d.split(".");
+  if (parts.length !== 3) return "";
 
+  let [day, month, year] = parts.map(Number);
+
+  // Convert 25 → 2025
+  year = year < 100 ? 2000 + year : year;
+
+  return new Date(year, month - 1, day);
+};
   const getUniqueLocations = () => {
-    return [...new Set(reports.map(report => report.location))];
+    return [...new Set(reports.map(report => report.POLICE_STATION))];
   };
 
   const getUniqueDates = () => {
-    return [...new Set(reports.map(report => report.theftDate))];
+    return [...new Set(reports.map(report => report.DATE))];
   };
 
   if (loading) {
@@ -219,7 +161,8 @@ const Reports = () => {
       </div>
     );
   }
-
+const capitalize = (str) =>
+  str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -417,31 +360,31 @@ const Reports = () => {
                       <div className="flex items-center">
                         <FileText className="w-4 h-4 text-gray-400 mr-2" />
                         <span className="text-sm font-medium text-gray-900">
-                          {report.reportId}
+                          { capitalize(report.CaseNo) }
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div>
                         <div className="text-sm font-medium text-gray-900">
-                          {report.bikeModel}
+                          { capitalize(report.MAKE) }
                         </div>
                         <div className="text-sm text-gray-500">
-                          {report.licensePlate} • {report.color}
+                          {capitalize(report.Make)} • {capitalize(report.Category)}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">
-                        {report.location}
+                        {capitalize(report.POLICE_STATION)}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {new Date(report.theftDate).toLocaleDateString()} at {report.theftTime}
+                        {new Date(report.DATE).toLocaleDateString()} at {capitalize(report.Time_of_day)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
-                        {report.status}
+                        {"Case" + " " + report.STATUS}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
