@@ -47,7 +47,7 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, onTheftEntryClick }) => {
           <Link to="/" className="flex items-center space-x-3">
             <Shield className="w-8 h-8 text-blue-600" />
             <div>
-              <h1 className="text-xl font-bold text-gray-900">BikeGuard</h1>
+              <h1 className="text-xl font-bold text-gray-900">RikeShield</h1>
               <p className="text-xs text-gray-500">Security Dashboard</p>
             </div>
           </Link>
